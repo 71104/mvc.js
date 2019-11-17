@@ -18,6 +18,7 @@
     "gulp-typescript": "^5.0.1",
     "gulp-uglify-es": "^2.0.0",
     "gulp-umd": "^2.0.0",
+    "merge-stream": "^2.0.0",
     "typescript": "^3.7.2"
   }
 }

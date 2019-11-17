@@ -1,5 +1,6 @@
 const gulp = require('gulp');
 const typescript = require('gulp-typescript');
+const merge = require('merge-stream');
 const umd = require('gulp-umd');
 const uglify = require('gulp-uglify-es').default;
 const rename = require('gulp-rename');
@@ -7,9 +8,9 @@ const del = require('del');
 
 gulp.task('compile', function () {
   const project = typescript.createProject('tsconfig.json');
-  return gulp.src('src/**/*.ts')
-      .pipe(project())
-      .pipe(umd())
+  const tsResult = gulp.src('src/**/*.ts')
+      .pipe(project());
+  return merge(tsResult, tsResult.js.pipe(umd()))
       .pipe(gulp.dest('bin'));
 });
 
