@@ -1,0 +1,22 @@
+{
+  "name": "mvc.js",
+  "version": "1.0.0",
+  "description": "Lightweight MVC Framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darblast/mvc.js.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/darblast/mvc.js/issues"
+  },
+  "homepage": "https://github.com/darblast/mvc.js#readme",
+  "devDependencies": {
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "gulp-typescript": "^5.0.1",
+    "gulp-uglify-es": "^2.0.0",
+    "gulp-umd": "^2.0.0",
+    "typescript": "^3.7.2"
+  }
+}

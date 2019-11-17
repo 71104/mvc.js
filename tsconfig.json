@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "none",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "downlevelIteration": true,
+    "target": "es5",
+    "declaration": true,
+    "outFile": "mvc.js"
+  }
+}
