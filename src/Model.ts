@@ -60,8 +60,9 @@ class Model {
       } else if ('object' === typeof this._data[key]) {
         throw new MVC.ModelChangeError(`cannot reassign object field "${key}"`);
       } else {
+        const oldValue = this._data[key];
         this._data[key] = value;
-        this._handlers.fire(key, value);
+        this._handlers.fire(key, value, oldValue);
         return true;
       }
     } else {
