@@ -2,6 +2,17 @@
 /// <reference path="Types.ts" />
 
 
+namespace MVC {
+
+export class ModelChangeError extends Error {
+  public constructor(message: string) {
+    super(`${message}: changing the structure of a model is forbidden`);
+  }
+}
+
+}  // namespace MVC
+
+
 type ModelField = PrimitiveValue | Model | Collection;
 
 
@@ -37,24 +48,28 @@ class Model {
     }
     // @ts-ignore
     this._proxy = new Proxy(this._data, {
-      set: ((obj: Dictionary, key: any, value: any): boolean => {
-        if (key in this._data) {
-          if (typeof this._data[key] !== typeof value) {
-            throw new Error(`cannot change type of property "${key}" from ${typeof this._data[key]} to ${typeof value}: changing the structure of a model is forbidden`);
-          } else if ('object' === typeof this._data[key]) {
-            throw new Error(`cannot reassign object field "${key}": changing the structure of a model is forbidden`);
-          } else {
-            this._data[key] = value;
-            return true;
-          }
-        } else {
-          throw new Error(`cannot add property "${key}": changing the structure of a model is forbidden`);
-        }
-      }).bind(this),
-      deleteProperty: (obj: Dictionary, key: any): boolean => {
-        throw new Error(`cannot delete property "${key}": changing the structure of a model is forbidden`);
-      },
+      set: this._setTrap.bind(this),
+      deleteProperty: this._deleteTrap.bind(this),
     });
+  }
+
+  private _setTrap(obj: Dictionary, key: any, value: any): boolean {
+    if (key in this._data) {
+      if (typeof this._data[key] !== typeof value) {
+        throw new MVC.ModelChangeError(`cannot change type of property "${key}" from ${typeof this._data[key]} to ${typeof value}`);
+      } else if ('object' === typeof this._data[key]) {
+        throw new MVC.ModelChangeError(`cannot reassign object field "${key}"`);
+      } else {
+        this._data[key] = value;
+        return true;
+      }
+    } else {
+      throw new MVC.ModelChangeError(`cannot add property "${key}"`);
+    }
+  }
+
+  private _deleteTrap(obj: Dictionary, key: string): boolean {
+    throw new MVC.ModelChangeError(`cannot delete property "${key}"`);
   }
 
   public get proxy(): typeof Proxy {
