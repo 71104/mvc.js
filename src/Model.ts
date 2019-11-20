@@ -70,7 +70,7 @@ class Model {
     }
   }
 
-  private _deleteTrap(obj: Dictionary, key: string): boolean {
+  private _deleteTrap(obj: Dictionary, key: any): boolean {
     throw new MVC.ModelChangeError(`cannot delete property "${key}"`);
   }
 
@@ -107,9 +107,17 @@ class Model {
 
 
 class Collection {
+  private readonly _data: ModelField[] = [];
+  private readonly _proxy: typeof Proxy;
   private readonly _handlers: EventEmitter = new EventEmitter();
 
   public constructor(data: any[]) {
-    // TODO
+    for (var i = 0; i < data.length; i++) {
+      // TODO
+    }
+  }
+
+  public get proxy(): typeof Proxy {
+    return this._proxy;
   }
 }
