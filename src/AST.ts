@@ -1,3 +1,6 @@
+/// <reference path="Types.ts" />
+
+
 namespace MVC {
 namespace Expressions {
 namespace AST {
@@ -13,12 +16,6 @@ function unique(...elements: (string | string[])[]): string[] {
   let array: string[] = [];
   return [...new Set<string>(array.concat(...elements))];
 }
-
-
-type PrimitiveValue = null | boolean | number | string;
-type ArrayValue = PrimitiveValue[];
-type DictionaryValue = {[key: string]: LiteralValue};
-type LiteralValue = PrimitiveValue | ArrayValue | DictionaryValue;
 
 
 export class LiteralNode implements NodeInterface {
