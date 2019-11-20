@@ -61,6 +61,7 @@ class Model {
         throw new MVC.ModelChangeError(`cannot reassign object field "${key}"`);
       } else {
         this._data[key] = value;
+        this._handlers.fire(key, value);
         return true;
       }
     } else {

@@ -1,4 +1,4 @@
-type EventHandler = (key: string) => void;
+type EventHandler = (key: string, ...parameters: any[]) => void;
 
 
 class EventEmitter {
@@ -28,11 +28,11 @@ class EventEmitter {
     return this;
   }
 
-  public fire(key: string): EventEmitter {
+  public fire(key: string, ...parameters: any[]): EventEmitter {
     if (key in this._handlers) {
       const queue = this._handlers[key];
       for (var i = 0; i < queue.length; i++) {
-        queue[i](key);
+        queue[i](key, ...parameters);
       }
     }
     return this;
