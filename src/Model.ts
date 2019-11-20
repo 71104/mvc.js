@@ -41,6 +41,8 @@ class Model {
         if (key in this._data) {
           if (typeof this._data[key] !== typeof value) {
             throw new Error(`cannot change type of property "${key}" from ${typeof this._data[key]} to ${typeof value}: changing the structure of a model is forbidden`);
+          } else if ('object' === typeof this._data[key]) {
+            throw new Error(`cannot reassign object field "${key}": changing the structure of a model is forbidden`);
           } else {
             this._data[key] = value;
             return true;
