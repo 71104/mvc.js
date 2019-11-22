@@ -2,39 +2,53 @@
 /// <reference path="Types.ts" />
 
 
+class ModelHandler {
+  private readonly _wrapped: Dictionary;
+
+  public constructor(
+      private readonly _model: Model,
+      private readonly _path: string[],
+      value: Dictionary)
+  {
+    this._wrapped = Object.create(null);
+    for (var property in value) {
+      const key = String(property);
+      if (value.hasOwnProperty(key)) {
+        this._wrapped[key] = this._model.wrap(this._path.concat(key), value[key]);
+      }
+    }
+  }
+
+  public set(obj: Dictionary, key: any, value: any): boolean {
+    const oldValue = obj[key];
+    const childPath = this._path.concat(String(key));
+    obj[key] = this._model.wrap(childPath, value);
+    this._model.fire(childPath, obj[key], oldValue);
+    return true;
+  }
+
+  public deleteProperty(obj: Dictionary, key: any): boolean {
+    const oldValue = obj[key];
+    const childPath = this._path.concat(String(key));
+    delete obj[key];
+    this._model.fire(childPath, obj[key], oldValue);
+    return true;
+  }
+}
+
+
 class Model {
   private readonly _handlers: EventEmitter = new EventEmitter();
   private readonly _proxy: typeof Proxy;
 
   private _wrapObject(path: string[], value: Dictionary): Dictionary {
-    const wrapped = Object.create(null);
-    for (var key in value) {
-      if (value.hasOwnProperty(key)) {
-        wrapped[key] = this._wrap(path.concat(key), value[key]);
-      }
-    }
-    return new Proxy(wrapped, {
-      set: ((obj: Dictionary, key: any, value: any): boolean => {
-        const oldValue = obj[key];
-        const childPath = path.concat(String(key));
-        obj[key] = this._wrap(childPath, value);
-        this.fire(childPath, obj[key], oldValue);
-        return true;
-      }).bind(this),
-      deleteProperty: ((obj: Dictionary, key: any): boolean => {
-        const oldValue = obj[key];
-        const childPath = path.concat(String(key));
-        delete obj[key];
-        this.fire(childPath, obj[key], oldValue);
-        return true;
-      }).bind(this),
-    });
+    return new Proxy(value, new ModelHandler(this, path, value));
   }
 
   private _wrapCollection(path: string[], value: any[]): any[] {
     let length = value.length;
     return new Proxy(value.map((item, index) => {
-      return this._wrap(path.concat('' + index), item);
+      return this.wrap(path.concat('' + index), item);
     }, this), {
       set: ((obj: any[], key: any, value: any): boolean => {
         if (/^[0-9]+$/.test(String(key))) {
@@ -61,7 +75,7 @@ class Model {
     });
   }
 
-  private _wrap(path: string[], value: any): any {
+  public wrap(path: string[], value: any): any {
     switch (typeof value){
     case 'undefined':
     case 'boolean':
@@ -82,7 +96,7 @@ class Model {
   }
 
   public constructor(data: Dictionary) {
-    this._proxy = this._wrap([], data);
+    this._proxy = this.wrap([], data);
   }
 
   public get proxy(): typeof Proxy {
