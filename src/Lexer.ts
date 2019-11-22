@@ -11,6 +11,8 @@ type Token = 'begin'
   | 'operator'
   | 'left'
   | 'right'
+  | 'left-square'
+  | 'right-square'
   | 'end';
 
 
@@ -35,11 +37,21 @@ class Lexer {
     return this._label;
   }
 
-  private _match(token: Token, pattern: RegExp): boolean {
+  private _read(pattern: RegExp): string | null {
     const result = pattern.exec(this._input);
     if (result) {
-      this._label = result[0];
-      this._input = this._input.substr(this._label.length);
+      const label = result[0];
+      this._input = this._input.substr(label.length);
+      return label;
+    } else {
+      return null;
+    }
+  }
+
+  private _match(token: Token, pattern: RegExp): boolean {
+    const label = this._read(pattern);
+    if (null !== label) {
+      this._label = label;
       this._token = token;
       return true;
     } else {
@@ -48,12 +60,29 @@ class Lexer {
   }
 
   public next(): Token {
+    if (!this._input.length) {
+      this._label = '';
+      return this._token = 'end';
+    }
+    if (null === this._read(/^\s+/)) {
+      return this.next();
+    }
     switch (true) {
     case this._match('undefined', /^undefined/):
     case this._match('true', /^true/):
     case this._match('false', /^false/):
+    case this._match('operator', /^in\b/):
     case this._match('name', /^[A-Za-z_][A-Za-z0-9_]*/):
     case this._match('number', /^[0-9]+/):
+    case this._match('string', /^"([^"](\\"))*"/):
+    case this._match('string', /^'([^'](\\'))*'/):
+    case this._match('operator', /^\>\>\>|\=\=\=|\!\=\=/):
+    case this._match('operator', /^\*\*|\<\<|\>\>|\<\=|\>\=|\=\=|\!\=|\?\?|\&\&|\|\|/):
+    case this._match('operator', /^\+|\-|\*|\/|\%|\<|\>|\!/):
+    case this._match('left', /^\(/):
+    case this._match('right', /^\)/):
+    case this._match('left-square', /^\[/):
+    case this._match('right-square', /^\]/):
       return this._token;
     default:
       throw new MVC.SyntaxError(this.originalInput);

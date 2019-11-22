@@ -3,19 +3,87 @@
 
 
 namespace MVC {
-namespace Expressions {
-namespace Parsing {
+export namespace Expressions {
 
 
 export class Parser {
   private readonly _lexer: Lexer;
 
+  private static readonly _BINARY_OPERATOR_PRECEDENCE_TABLE = [
+    ['**'],
+    ['*', '/', '%'],
+    ['+', '-'],
+    ['<<', '>>', '>>>'],
+    ['<', '<=', '>', '>=', 'in'],
+  ];
+
   public constructor(public readonly input: string) {
     this._lexer = new Lexer(input);
+    this._lexer.next();  // the first token is always "begin"
+  }
+
+  private _parseStringLiteral(label: string): string {
+    // TODO: parse escape sequences
+    return label
+        .replace(/^["']/, '')
+        .replace(/["']$/, '')
+        .replace(/\\(.)/g, '$1');
+  }
+
+  private _parseValue(): NodeInterface {
+    switch (this._lexer.next()) {
+    case 'undefined':
+      return new LiteralNode(void 0);
+    case 'true':
+      return new LiteralNode(true);
+    case 'false':
+      return new LiteralNode(false);
+    case 'number':
+      return new LiteralNode(parseFloat(this._lexer.label));
+    case 'string':
+      return new LiteralNode(this._parseStringLiteral(this._lexer.label));
+    case 'left':
+      const node = this.parseRoot();
+      this._lexer.expect('right');
+      return node;
+    default:
+      throw new MVC.SyntaxError(this.input);
+    }
+  }
+
+  private _parseUnaryNode(): NodeInterface {
+    if ('operator' !== this._lexer.token) {
+      return this._parseValue();
+    } else {
+      const operator = this._lexer.label;
+      if (['+', '-', '!'].includes(operator)) {
+        this._lexer.next();
+        return new UnaryNode(operator, this._parseUnaryNode());
+      } else {
+        throw new MVC.SyntaxError(this.input);
+      }
+    }
+  }
+
+  private _parseBinaryNode(precedenceIndex: number): NodeInterface {
+    if (precedenceIndex < Parser._BINARY_OPERATOR_PRECEDENCE_TABLE.length) {
+      const left = this._parseBinaryNode(precedenceIndex + 1);
+      const operators = Parser._BINARY_OPERATOR_PRECEDENCE_TABLE[precedenceIndex];
+      if ('operator' !== this._lexer.token || !operators.includes(this._lexer.label)) {
+        return left;
+      } else {
+        return new BinaryNode(this._lexer.label, left, this._parseBinaryNode(precedenceIndex));
+      }
+    } else {
+      return this._parseUnaryNode();
+    }
+  }
+
+  public parseRoot(): NodeInterface {
+    return this._parseBinaryNode(0);
   }
 }
 
 
-}  // namespace Parsing
 }  // namespace Expressions
 }  // namespace MVC
