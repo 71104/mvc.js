@@ -14,12 +14,25 @@ class Model {
       }
     }
     return new Proxy(wrapped, {
-      set: this._setTrap.bind(this, path),
-      deleteProperty: this._deleteTrap.bind(this, path),
+      set: ((obj: Dictionary, key: any, value: any): boolean => {
+        const oldValue = obj[key];
+        const childPath = path.concat(String(key));
+        obj[key] = this._wrap(childPath, value);
+        this.fire(childPath, value, oldValue);
+        return true;
+      }).bind(this),
+      deleteProperty: ((obj: Dictionary, key: any, value: any): boolean => {
+        const oldValue = obj[key];
+        const childPath = path.concat(String(key));
+        obj[key] = this._wrap(childPath, value);
+        this.fire(childPath, void 0, oldValue);
+        return true;
+      }).bind(this),
     });
   }
 
   private _wrapCollection(path: string[], value: any[]): any[] {
+    let length = value.length;
     return new Proxy(value.map((item, index) => {
       return this._wrap(path.concat('' + index), item);
     }, this), {
@@ -49,19 +62,6 @@ class Model {
 
   public constructor(data: Dictionary) {
     this._proxy = this._wrap([], data);
-  }
-
-  private _setTrap(path: string[], obj: Dictionary, key: any, value: any): boolean {
-    const oldValue = obj[key];
-    const childPath = path.concat(key);
-    obj[key] = this._wrap(childPath, value);
-    this.fire(childPath, value, oldValue);
-    return true;
-  }
-
-  private _deleteTrap(path: string[], obj: Dictionary, key: any): boolean {
-    // TODO
-    return true;
   }
 
   public get proxy(): typeof Proxy {
