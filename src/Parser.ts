@@ -43,7 +43,7 @@ export class Parser {
     case 'string':
       return new LiteralNode(this._parseStringLiteral(this._lexer.label));
     case 'left':
-      const node = this.parseRoot();
+      const node = this._parseRoot();
       this._lexer.expect('right');
       return node;
     default:
@@ -79,9 +79,25 @@ export class Parser {
     }
   }
 
-  public parseRoot(): NodeInterface {
+  public _parseRoot(): NodeInterface {
     return this._parseBinaryNode(0);
   }
+
+  public parse(): NodeInterface {
+    const node = this._parseRoot();
+    if (this._lexer.end) {
+      return node;
+    } else {
+      throw new MVC.SyntaxError(this.input);
+    }
+  }
+}
+
+
+export function compile(expression: string): Function {
+  const parser = new Parser(expression);
+  const node = parser.parse();
+  return new Function(`with(this){return(${node.compile()});}`);
 }
 
 
