@@ -2,8 +2,7 @@
 
 
 namespace MVC {
-namespace Expressions {
-namespace AST {
+export namespace Expressions {
 
 
 export interface NodeInterface {
@@ -12,13 +11,20 @@ export interface NodeInterface {
 }
 
 
+}  // namespace Expressions
+}  // namespace MVC
+
+
+type NodeInterface = MVC.Expressions.NodeInterface;
+
+
 function unique(...elements: (string | string[])[]): string[] {
   let array: string[] = [];
   return [...new Set<string>(array.concat(...elements))];
 }
 
 
-export class LiteralNode implements NodeInterface {
+class LiteralNode implements NodeInterface {
   private readonly _value: string;
 
   public constructor(value: LiteralValue) {
@@ -35,7 +41,7 @@ export class LiteralNode implements NodeInterface {
 }
 
 
-export class VariableNode implements NodeInterface {
+class VariableNode implements NodeInterface {
   public constructor(public readonly name: string) {}
 
   public free(): string[] {
@@ -48,7 +54,7 @@ export class VariableNode implements NodeInterface {
 }
 
 
-export class UnaryNode implements NodeInterface {
+class UnaryNode implements NodeInterface {
   public constructor(
     public readonly operator: string,
     public readonly inner: NodeInterface) {}
@@ -63,7 +69,7 @@ export class UnaryNode implements NodeInterface {
 }
 
 
-export class BinaryNode implements NodeInterface {
+class BinaryNode implements NodeInterface {
   public constructor(
     public readonly operator: string,
     public readonly left: NodeInterface,
@@ -79,7 +85,7 @@ export class BinaryNode implements NodeInterface {
 }
 
 
-export class BindNode implements NodeInterface {
+class BindNode implements NodeInterface {
   public constructor(
     public readonly name: string,
     public readonly parameters: NodeInterface[]) {}
@@ -94,7 +100,7 @@ export class BindNode implements NodeInterface {
 }
 
 
-export class PipeNode implements NodeInterface {
+class PipeNode implements NodeInterface {
   public constructor(
     public readonly left: NodeInterface,
     public readonly right: NodeInterface) {}
@@ -107,8 +113,3 @@ export class PipeNode implements NodeInterface {
     return `(${this.right.compile()})(${this.left.compile()})`;
   }
 }
-
-
-}  // namespace AST
-}  // namespace Expressions
-}  // namespace MVC

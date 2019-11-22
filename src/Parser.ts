@@ -1,4 +1,5 @@
 /// <reference path="Lexer.ts" />
+/// <reference path="AST.ts" />
 
 
 namespace MVC {
