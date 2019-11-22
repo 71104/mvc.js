@@ -19,61 +19,73 @@ class ModelHandler {
     }
   }
 
-  public set(obj: Dictionary, key: any, value: any): boolean {
-    const oldValue = obj[key];
+  public apply(target: Dictionary, thisArgument: any, argumentList: any[]): any {
+    throw new TypeError('cannot invoke model object');
+  }
+
+  public construct(target: Dictionary, argumentList: any[], newTarget: any): any {
+    throw new TypeError('cannot use new operator on model object');
+  }
+
+  public deleteProperty(target: Dictionary, key: any): boolean {
+    const oldValue = Reflect.get(this._wrapped, key);
     const childPath = this._path.concat(String(key));
-    obj[key] = this._model.wrap(childPath, value);
-    this._model.fire(childPath, obj[key], oldValue);
+    Reflect.deleteProperty(this._wrapped, key);
+    this._model.fire(childPath, void 0, oldValue);
     return true;
   }
 
-  public deleteProperty(obj: Dictionary, key: any): boolean {
-    const oldValue = obj[key];
+  public get(target: Dictionary, key: any, receiver: any): any {
+    return Reflect.get(this._wrapped, key, receiver);
+  }
+
+  public has(target: Dictionary, key: any): boolean {
+    return Reflect.has(this._wrapped, key);
+  }
+
+  public set(target: Dictionary, key: any, value: any, receiver: any): boolean {
+    const oldValue = Reflect.get(this._wrapped, key, receiver);
     const childPath = this._path.concat(String(key));
-    delete obj[key];
-    this._model.fire(childPath, obj[key], oldValue);
+    const wrappedValue = this._model.wrap(childPath, value);
+    Reflect.set(this._wrapped, key, wrappedValue, receiver);
+    this._model.fire(childPath, wrappedValue, oldValue);
     return true;
   }
+}
+
+
+class CollectionHandler {
+  private readonly _wrapped: any[];
+
+  public constructor(
+      private readonly _model: Model,
+      private readonly _path: string[],
+      value: any[])
+  {
+    this._wrapped = value.map((element, index) => {
+      return this._model.wrap(this._path.concat('' + index), element);
+    }, this);
+  }
+
+  public apply(target: any[], thisArgument: any, argumentList: any[]): any {
+    throw new TypeError('cannot invoke model collection');
+  }
+
+  public construct(target: any[], argumentList: any[], newTarget: any): any {
+    throw new TypeError('cannot use new operator on model collection');
+  }
+
+  public has(target: any[], key: any): boolean {
+    return Reflect.has(this._wrapped, key);
+  }
+
+  // TODO
 }
 
 
 class Model {
   private readonly _handlers: EventEmitter = new EventEmitter();
   private readonly _proxy: typeof Proxy;
-
-  private _wrapObject(path: string[], value: Dictionary): Dictionary {
-    return new Proxy(value, new ModelHandler(this, path, value));
-  }
-
-  private _wrapCollection(path: string[], value: any[]): any[] {
-    let length = value.length;
-    return new Proxy(value.map((item, index) => {
-      return this.wrap(path.concat('' + index), item);
-    }, this), {
-      set: ((obj: any[], key: any, value: any): boolean => {
-        if (/^[0-9]+$/.test(String(key))) {
-          const index = parseInt(key, 10);
-          const childPath = path.concat('' + index);
-          // TODO
-          return true;
-        } else {
-          // TODO
-          return false;
-        }
-      }).bind(this),
-      deleteProperty: ((obj: any[], key: any): boolean => {
-        if (/^[0-9]+$/.test(String(key))) {
-          const index = parseInt(key, 10);
-          const childPath = path.concat('' + index);
-          // TODO
-          return true;
-        } else {
-          // TODO
-          return false;
-        }
-      }).bind(this),
-    });
-  }
 
   public wrap(path: string[], value: any): any {
     switch (typeof value){
@@ -86,9 +98,9 @@ class Model {
       if (null === value) {
         return null;
       } else if (Array.isArray(value)) {
-        return this._wrapCollection(path, value);
+        return new Proxy(value, new CollectionHandler(this, path, value));
       } else {
-        return this._wrapObject(path, value);
+        return new Proxy(value, new ModelHandler(this, path, value));
       }
     default:
       throw new TypeError(`illegal value of type "${typeof value}" in model`);
