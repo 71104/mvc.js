@@ -18,14 +18,14 @@ class Model {
         const oldValue = obj[key];
         const childPath = path.concat(String(key));
         obj[key] = this._wrap(childPath, value);
-        this.fire(childPath, value, oldValue);
+        this.fire(childPath, obj[key], oldValue);
         return true;
       }).bind(this),
-      deleteProperty: ((obj: Dictionary, key: any, value: any): boolean => {
+      deleteProperty: ((obj: Dictionary, key: any): boolean => {
         const oldValue = obj[key];
         const childPath = path.concat(String(key));
-        obj[key] = this._wrap(childPath, value);
-        this.fire(childPath, void 0, oldValue);
+        delete obj[key];
+        this.fire(childPath, obj[key], oldValue);
         return true;
       }).bind(this),
     });
@@ -36,7 +36,28 @@ class Model {
     return new Proxy(value.map((item, index) => {
       return this._wrap(path.concat('' + index), item);
     }, this), {
-      // TODO
+      set: ((obj: any[], key: any, value: any): boolean => {
+        if (/^[0-9]+$/.test(String(key))) {
+          const index = parseInt(key, 10);
+          const childPath = path.concat('' + index);
+          // TODO
+          return true;
+        } else {
+          // TODO
+          return false;
+        }
+      }).bind(this),
+      deleteProperty: ((obj: any[], key: any): boolean => {
+        if (/^[0-9]+$/.test(String(key))) {
+          const index = parseInt(key, 10);
+          const childPath = path.concat('' + index);
+          // TODO
+          return true;
+        } else {
+          // TODO
+          return false;
+        }
+      }).bind(this),
     });
   }
 
