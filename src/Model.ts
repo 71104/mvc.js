@@ -68,20 +68,24 @@ class Model {
     return this._proxy;
   }
 
-  public on(field: string, handler: EventHandler): Model {
-    this._handlers.on(field, handler);
+  private _getEventKey(path: string[]): string {
+    return path.map(component => {
+      return component.replace('\\', '\\\\').replace('.', '\\.');
+    }).join('.');
+  }
+
+  public on(path: string[], handler: EventHandler): Model {
+    this._handlers.on(this._getEventKey(path), handler);
     return this;
   }
 
-  public off(field: string, handler: EventHandler): Model {
-    this._handlers.off(field, handler);
+  public off(path: string[], handler: EventHandler): Model {
+    this._handlers.off(this._getEventKey(path), handler);
     return this;
   }
 
   public fire(path: string[], ...parameters: any[]): Model {
-    this._handlers.fire(path.map(component => {
-      return component.replace('.', '');
-    }).join('.'));
+    this._handlers.fire(this._getEventKey(path), ...parameters);
     return this;
   }
 }
