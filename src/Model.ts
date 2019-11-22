@@ -2,76 +2,66 @@
 /// <reference path="Types.ts" />
 
 
-namespace MVC {
-
-export class ModelChangeError extends Error {
-  public constructor(message: string) {
-    super(`${message}: changing the structure of a model is forbidden`);
-  }
-}
-
-}  // namespace MVC
-
-
-type ModelField = PrimitiveValue | Model | Collection;
-
-
 class Model {
-  private readonly _data: {[key: string]: ModelField} = Object.create(null);
-  private readonly _proxy: typeof Proxy;
   private readonly _handlers: EventEmitter = new EventEmitter();
+  private readonly _proxy: typeof Proxy;
 
-  public constructor(data: Dictionary) {
-    for (var key in data) {
-      if (data.hasOwnProperty(key)) {
-        const value = data[key];
-        switch (typeof value){
-        case 'undefined':
-        case 'boolean':
-        case 'number':
-        case 'string':
-          this._data[key] = <PrimitiveValue>value;
-          break;
-        case 'object':
-          if (null === value) {
-            this._data[key] = null;
-          } else if (Array.isArray(value)) {
-            this._data[key] = new Collection(value);
-          } else {
-            this._data[key] = new Model(value);
-          }
-          break;
-        default:
-          throw new TypeError(`illegal type "${typeof value}" for field "${key}" in model`);
-        }
+  private _wrapObject(path: string[], value: Dictionary): Dictionary {
+    const wrapped = Object.create(null);
+    for (var key in value) {
+      if (value.hasOwnProperty(key)) {
+        wrapped[key] = this._wrap(path.concat(key), value[key]);
       }
     }
-    // @ts-ignore
-    this._proxy = new Proxy(this._data, {
-      set: this._setTrap.bind(this),
-      deleteProperty: this._deleteTrap.bind(this),
+    return new Proxy(wrapped, {
+      set: this._setTrap.bind(this, path),
+      deleteProperty: this._deleteTrap.bind(this, path),
     });
   }
 
-  private _setTrap(obj: Dictionary, key: any, value: any): boolean {
-    if (key in this._data) {
-      if (typeof this._data[key] !== typeof value) {
-        throw new MVC.ModelChangeError(`cannot change type of property "${key}" from ${typeof this._data[key]} to ${typeof value}`);
-      } else if ('object' === typeof this._data[key]) {
-        throw new MVC.ModelChangeError(`cannot reassign object field "${key}"`);
+  private _wrapCollection(path: string[], value: any[]): any[] {
+    return new Proxy(value.map((item, index) => {
+      return this._wrap(path.concat('' + index), item);
+    }, this), {
+      // TODO
+    });
+  }
+
+  private _wrap(path: string[], value: any): any {
+    switch (typeof value){
+    case 'undefined':
+    case 'boolean':
+    case 'number':
+    case 'string':
+      return value;
+    case 'object':
+      if (null === value) {
+        return null;
+      } else if (Array.isArray(value)) {
+        return this._wrapCollection(path, value);
       } else {
-        const oldValue = this._data[key];
-        this._data[key] = value;
-        this._handlers.fire(key, value, oldValue);
-        return true;
+        return this._wrapObject(path, value);
       }
-    } else {
-      throw new MVC.ModelChangeError(`cannot add property "${key}"`);
+    default:
+      throw new TypeError(`illegal value of type "${typeof value}" in model`);
     }
   }
 
-  private _deleteTrap(obj: Dictionary, key: any): boolean {
-    throw new MVC.ModelChangeError(`cannot delete property "${key}"`);
+  public constructor(data: Dictionary) {
+    this._proxy = this._wrap([], data);
+  }
+
+  private _setTrap(path: string[], obj: Dictionary, key: any, value: any): boolean {
+    const oldValue = obj[key];
+    const childPath = path.concat(key);
+    obj[key] = this._wrap(childPath, value);
+    this.fire(childPath, value, oldValue);
+    return true;
+  }
+
+  private _deleteTrap(path: string[], obj: Dictionary, key: any): boolean {
+    // TODO
+    return true;
   }
 
   public get proxy(): typeof Proxy {
@@ -79,45 +69,19 @@ class Model {
   }
 
   public on(field: string, handler: EventHandler): Model {
-    if (field in this._data) {
-      this._handlers.on(field, handler);
-      return this;
-    } else {
-      throw new TypeError(`field "${name}" doesn't exist in this model`);
-    }
+    this._handlers.on(field, handler);
+    return this;
   }
 
   public off(field: string, handler: EventHandler): Model {
-    if (field in this._data) {
-      this._handlers.off(field, handler);
-      return this;
-    } else {
-      throw new TypeError(`field "${name}" doesn't exist in this model`);
-    }
+    this._handlers.off(field, handler);
+    return this;
   }
 
-  public getField(name: string): ModelField {
-    if (name in this._data) {
-      return this._data[name];
-    } else {
-      throw new TypeError(`field "${name}" doesn't exist in this model`);
-    }
-  }
-}
-
-
-class Collection {
-  private readonly _data: ModelField[] = [];
-  private readonly _proxy: typeof Proxy;
-  private readonly _handlers: EventEmitter = new EventEmitter();
-
-  public constructor(data: any[]) {
-    for (var i = 0; i < data.length; i++) {
-      // TODO
-    }
-  }
-
-  public get proxy(): typeof Proxy {
-    return this._proxy;
+  public fire(path: string[], ...parameters: any[]): Model {
+    this._handlers.fire(path.map(component => {
+      return component.replace('.', '');
+    }).join('.'));
+    return this;
   }
 }
