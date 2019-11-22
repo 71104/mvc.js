@@ -3,35 +3,41 @@
 
 
 class ModelHandler {
-  private readonly _wrapped: Dictionary;
-
-  public constructor(
+  private constructor(
       private readonly _model: Model,
       private readonly _path: string[],
-      value: Dictionary)
-  {
-    this._wrapped = Object.create(null);
-    for (var property in value) {
+      private readonly _wrapped: {}) {}
+
+  public static createForObject(model: Model, path: string[], data: Dictionary) {
+    const wrapped = Object.create(null);
+    for (var property in data) {
       const key = String(property);
-      if (value.hasOwnProperty(key)) {
-        this._wrapped[key] = this._model.wrap(this._path.concat(key), value[key]);
+      if (data.hasOwnProperty(key)) {
+        wrapped[property] = model.wrap(path.concat(key), data[property]);
       }
     }
+    return new ModelHandler(model, path, wrapped);
   }
 
-  public apply(target: Dictionary, thisArgument: any, argumentList: any[]): any {
+  public static createForArray(model: Model, path: string[], data: any[]) {
+    return new ModelHandler(model, path, data.map((element, index) => {
+      return model.wrap(path.concat('' + index), element);
+    }));
+  }
+
+  public apply(target: {}, thisArgument: any, argumentList: any[]): any {
     throw new TypeError('cannot invoke model object');
   }
 
-  public construct(target: Dictionary, argumentList: any[], newTarget: any): any {
+  public construct(target: {}, argumentList: any[], newTarget: any): any {
     throw new TypeError('cannot use new operator on model object');
   }
 
-  public defineProperty(target: Dictionary, key: any, descriptor: {}): boolean {
+  public defineProperty(target: {}, key: any, descriptor: {}): boolean {
     return false;
   }
 
-  public deleteProperty(target: Dictionary, key: any): boolean {
+  public deleteProperty(target: {}, key: any): boolean {
     const oldValue = Reflect.get(this._wrapped, key);
     const childPath = this._path.concat(String(key));
     Reflect.deleteProperty(this._wrapped, key);
@@ -39,35 +45,35 @@ class ModelHandler {
     return true;
   }
 
-  public get(target: Dictionary, key: any, receiver: any): any {
+  public get(target: {}, key: any, receiver: any): any {
     return Reflect.get(this._wrapped, key, receiver);
   }
 
-  public getOwnPropertyDescriptor(target: Dictionary, key: any) {
+  public getOwnPropertyDescriptor(target: {}, key: any) {
     return Reflect.getOwnPropertyDescriptor(this._wrapped, key);
   }
 
-  public getPrototypeOf(target: Dictionary) {
-    return null;
+  public getPrototypeOf(target: {}) {
+    return Reflect.getPrototypeOf(this._wrapped);
   }
 
-  public has(target: Dictionary, key: any): boolean {
+  public has(target: {}, key: any): boolean {
     return Reflect.has(this._wrapped, key);
   }
 
-  public isExtensible(target: Dictionary): boolean {
+  public isExtensible(target: {}): boolean {
     return Reflect.isExtensible(this._wrapped);
   }
 
-  public ownKeys(target: Dictionary) {
+  public ownKeys(target: {}) {
     return Reflect.ownKeys(this._wrapped);
   }
 
-  public preventExtensions(target: Dictionary): boolean {
+  public preventExtensions(target: {}): boolean {
     return Reflect.preventExtensions(this._wrapped);
   }
 
-  public set(target: Dictionary, key: any, value: any, receiver: any): boolean {
+  public set(target: {}, key: any, value: any, receiver: any): boolean {
     const oldValue = Reflect.get(this._wrapped, key, receiver);
     const childPath = this._path.concat(String(key));
     const wrappedValue = this._model.wrap(childPath, value);
@@ -76,54 +82,9 @@ class ModelHandler {
     return true;
   }
 
-  public setPrototypeOf(target: Dictionary, prototype: {}): boolean {
+  public setPrototypeOf(target: {}, prototype: {}): boolean {
     return false;
   }
-}
-
-
-class CollectionHandler {
-  private readonly _wrapped: any[];
-
-  public constructor(
-      private readonly _model: Model,
-      private readonly _path: string[],
-      value: any[])
-  {
-    this._wrapped = value.map((element, index) => {
-      return this._model.wrap(this._path.concat('' + index), element);
-    }, this);
-  }
-
-  public apply(target: any[], thisArgument: any, argumentList: any[]): any {
-    throw new TypeError('cannot invoke model collection');
-  }
-
-  public construct(target: any[], argumentList: any[], newTarget: any): any {
-    throw new TypeError('cannot use new operator on model collection');
-  }
-
-  public defineProperty(target: any[], key: any, descriptor: {}): boolean {
-    return false;
-  }
-
-  public deleteProperty(target: Dictionary, key: any): boolean {
-    const oldValue = Reflect.get(this._wrapped, key);
-    const childPath = this._path.concat(String(key));
-    Reflect.deleteProperty(this._wrapped, key);
-    this._model.fire(childPath, void 0, oldValue);
-    return true;
-  }
-
-  public get(target: Dictionary, key: any, receiver: any): any {
-    return Reflect.get(this._wrapped, key, receiver);
-  }
-
-  public has(target: any[], key: any): boolean {
-    return Reflect.has(this._wrapped, key);
-  }
-
-  // TODO
 }
 
 
@@ -142,9 +103,9 @@ class Model {
       if (null === value) {
         return null;
       } else if (Array.isArray(value)) {
-        return new Proxy(value, new CollectionHandler(this, path, value));
+        return new Proxy(value, ModelHandler.createForArray(this, path, value));
       } else {
-        return new Proxy(value, new ModelHandler(this, path, value));
+        return new Proxy(value, ModelHandler.createForObject(this, path, value));
       }
     default:
       throw new TypeError(`illegal value of type "${typeof value}" in model`);
