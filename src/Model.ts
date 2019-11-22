@@ -103,8 +103,20 @@ class CollectionHandler {
     throw new TypeError('cannot use new operator on model collection');
   }
 
-  public defineProperty(target: Dictionary, key: any, descriptor: {}): boolean {
+  public defineProperty(target: any[], key: any, descriptor: {}): boolean {
     return false;
+  }
+
+  public deleteProperty(target: Dictionary, key: any): boolean {
+    const oldValue = Reflect.get(this._wrapped, key);
+    const childPath = this._path.concat(String(key));
+    Reflect.deleteProperty(this._wrapped, key);
+    this._model.fire(childPath, void 0, oldValue);
+    return true;
+  }
+
+  public get(target: Dictionary, key: any, receiver: any): any {
+    return Reflect.get(this._wrapped, key, receiver);
   }
 
   public has(target: any[], key: any): boolean {
