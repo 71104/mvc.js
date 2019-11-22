@@ -70,7 +70,7 @@ class Model {
 
   private _getEventKey(path: string[]): string {
     return path.map(component => {
-      return component.replace('\\', '\\\\').replace('.', '\\.');
+      return component.replace(/\\/g, '\\\\').replace(/\./g, '\\.');
     }).join('.');
   }
 
