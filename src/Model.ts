@@ -6,7 +6,7 @@ class ModelHandler {
   private constructor(
       private readonly _model: Model,
       private readonly _path: string[],
-      private readonly _wrapped: {}) {}
+      private readonly _target: {}) {}
 
   public static createForObject(model: Model, path: string[], data: Dictionary) {
     const wrapped = Object.create(null);
@@ -38,46 +38,46 @@ class ModelHandler {
   }
 
   public deleteProperty(target: {}, key: any): boolean {
-    const oldValue = Reflect.get(this._wrapped, key);
+    const oldValue = Reflect.get(this._target, key);
     const childPath = this._path.concat(String(key));
-    Reflect.deleteProperty(this._wrapped, key);
+    Reflect.deleteProperty(this._target, key);
     this._model.fire(childPath, void 0, oldValue);
     return true;
   }
 
   public get(target: {}, key: any, receiver: any): any {
-    return Reflect.get(this._wrapped, key, receiver);
+    return Reflect.get(this._target, key, receiver);
   }
 
   public getOwnPropertyDescriptor(target: {}, key: any) {
-    return Reflect.getOwnPropertyDescriptor(this._wrapped, key);
+    return Reflect.getOwnPropertyDescriptor(this._target, key);
   }
 
   public getPrototypeOf(target: {}) {
-    return Reflect.getPrototypeOf(this._wrapped);
+    return Reflect.getPrototypeOf(this._target);
   }
 
   public has(target: {}, key: any): boolean {
-    return Reflect.has(this._wrapped, key);
+    return Reflect.has(this._target, key);
   }
 
   public isExtensible(target: {}): boolean {
-    return Reflect.isExtensible(this._wrapped);
+    return Reflect.isExtensible(this._target);
   }
 
   public ownKeys(target: {}) {
-    return Reflect.ownKeys(this._wrapped);
+    return Reflect.ownKeys(this._target);
   }
 
   public preventExtensions(target: {}): boolean {
-    return Reflect.preventExtensions(this._wrapped);
+    return Reflect.preventExtensions(this._target);
   }
 
   public set(target: {}, key: any, value: any, receiver: any): boolean {
-    const oldValue = Reflect.get(this._wrapped, key, receiver);
+    const oldValue = Reflect.get(this._target, key, receiver);
     const childPath = this._path.concat(String(key));
     const wrappedValue = this._model.wrap(childPath, value);
-    Reflect.set(this._wrapped, key, wrappedValue, receiver);
+    Reflect.set(this._target, key, wrappedValue, receiver);
     this._model.fire(childPath, wrappedValue, oldValue);
     return true;
   }
