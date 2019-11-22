@@ -6,7 +6,7 @@ export namespace Expressions {
 
 
 export interface NodeInterface {
-  free(): string[];
+  getFreePaths(): string[];
   compile(): string;
 }
 
@@ -31,7 +31,7 @@ class LiteralNode implements NodeInterface {
     this._value = JSON.stringify(value);
   }
 
-  public free(): string[] {
+  public getFreePaths(): string[] {
     return [];
   }
 
@@ -44,7 +44,7 @@ class LiteralNode implements NodeInterface {
 class VariableNode implements NodeInterface {
   public constructor(public readonly name: string) {}
 
-  public free(): string[] {
+  public getFreePaths(): string[] {
     return [this.name];
   }
 
@@ -59,8 +59,8 @@ class UnaryNode implements NodeInterface {
     public readonly operator: string,
     public readonly inner: NodeInterface) {}
 
-  public free(): string[] {
-    return this.inner.free();
+  public getFreePaths(): string[] {
+    return this.inner.getFreePaths();
   }
 
   public compile(): string {
@@ -75,8 +75,8 @@ class BinaryNode implements NodeInterface {
     public readonly left: NodeInterface,
     public readonly right: NodeInterface) {}
 
-  public free(): string[] {
-    return unique(this.left.free(), this.right.free());
+  public getFreePaths(): string[] {
+    return unique(this.left.getFreePaths(), this.right.getFreePaths());
   }
 
   public compile(): string {
@@ -90,8 +90,8 @@ class BindNode implements NodeInterface {
     public readonly name: string,
     public readonly parameters: NodeInterface[]) {}
 
-  public free(): string[] {
-    return unique(this.name, ...this.parameters.map(parameter => parameter.free()));
+  public getFreePaths(): string[] {
+    return unique(this.name, ...this.parameters.map(parameter => parameter.getFreePaths()));
   }
 
   public compile(): string {
@@ -105,8 +105,8 @@ class PipeNode implements NodeInterface {
     public readonly left: NodeInterface,
     public readonly right: NodeInterface) {}
 
-  public free(): string[] {
-    return unique(this.left.free(), this.right.free());
+  public getFreePaths(): string[] {
+    return unique(this.left.getFreePaths(), this.right.getFreePaths());
   }
 
   public compile(): string {

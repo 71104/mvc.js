@@ -6,6 +6,7 @@ type Token = 'begin'
   | 'true'
   | 'false'
   | 'name'
+  | 'dot'
   | 'number'
   | 'string'
   | 'operator'
@@ -13,6 +14,7 @@ type Token = 'begin'
   | 'right'
   | 'left-square'
   | 'right-square'
+  | 'pipe'
   | 'end';
 
 
@@ -73,6 +75,7 @@ class Lexer {
     case this._match('false', /^false/):
     case this._match('operator', /^in\b/):
     case this._match('name', /^[A-Za-z_][A-Za-z0-9_]*/):
+    case this._match('dot', /^\./):
     case this._match('number', /^[0-9]+/):
     case this._match('string', /^"([^"](\\"))*"/):
     case this._match('string', /^'([^'](\\'))*'/):
@@ -83,9 +86,19 @@ class Lexer {
     case this._match('right', /^\)/):
     case this._match('left-square', /^\[/):
     case this._match('right-square', /^\]/):
+    case this._match('pipe', /^\|/):
       return this._token;
     default:
       throw new MVC.SyntaxError(this.originalInput);
+    }
+  }
+
+  public step(expected: Token): boolean {
+    if (expected !== this._token) {
+      return false;
+    } else {
+      this.next();
+      return true;
     }
   }
 
