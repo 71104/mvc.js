@@ -27,6 +27,10 @@ class ModelHandler {
     throw new TypeError('cannot use new operator on model object');
   }
 
+  public defineProperty(target: Dictionary, key: any, descriptor: {}): boolean {
+    return false;
+  }
+
   public deleteProperty(target: Dictionary, key: any): boolean {
     const oldValue = Reflect.get(this._wrapped, key);
     const childPath = this._path.concat(String(key));
@@ -39,8 +43,28 @@ class ModelHandler {
     return Reflect.get(this._wrapped, key, receiver);
   }
 
+  public getOwnPropertyDescriptor(target: Dictionary, key: any) {
+    return Reflect.getOwnPropertyDescriptor(this._wrapped, key);
+  }
+
+  public getPrototypeOf(target: Dictionary) {
+    return null;
+  }
+
   public has(target: Dictionary, key: any): boolean {
     return Reflect.has(this._wrapped, key);
+  }
+
+  public isExtensible(target: Dictionary): boolean {
+    return Reflect.isExtensible(this._wrapped);
+  }
+
+  public ownKeys(target: Dictionary) {
+    return Reflect.ownKeys(this._wrapped);
+  }
+
+  public preventExtensions(target: Dictionary): boolean {
+    return Reflect.preventExtensions(this._wrapped);
   }
 
   public set(target: Dictionary, key: any, value: any, receiver: any): boolean {
@@ -50,6 +74,10 @@ class ModelHandler {
     Reflect.set(this._wrapped, key, wrappedValue, receiver);
     this._model.fire(childPath, wrappedValue, oldValue);
     return true;
+  }
+
+  public setPrototypeOf(target: Dictionary, prototype: {}): boolean {
+    return false;
   }
 }
 
@@ -73,6 +101,10 @@ class CollectionHandler {
 
   public construct(target: any[], argumentList: any[], newTarget: any): any {
     throw new TypeError('cannot use new operator on model collection');
+  }
+
+  public defineProperty(target: Dictionary, key: any, descriptor: {}): boolean {
+    return false;
   }
 
   public has(target: any[], key: any): boolean {
