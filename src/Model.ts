@@ -42,6 +42,7 @@ class ModelHandler {
     const childPath = this._path.concat(String(key));
     Reflect.deleteProperty(this._target, key);
     this._model.fire(childPath, void 0, oldValue);
+    this._model.fire(this._path, this._target);
     return true;
   }
 
@@ -79,6 +80,7 @@ class ModelHandler {
     const wrappedValue = this._model.wrap(childPath, value);
     Reflect.set(this._target, key, wrappedValue, receiver);
     this._model.fire(childPath, wrappedValue, oldValue);
+    this._model.fire(this._path, this._target);
     return true;
   }
 
