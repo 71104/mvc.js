@@ -59,7 +59,7 @@ function flatUniquePaths(...elements: (FreePath | FreePath[])[]): FreePath[] {
 class LiteralNode implements NodeInterface {
   private readonly _value: string;
 
-  public constructor(value: LiteralValue) {
+  public constructor(value: any) {
     this._value = JSON.stringify(value);
   }
 
@@ -68,7 +68,7 @@ class LiteralNode implements NodeInterface {
   }
 
   public compile(): string {
-    return `${this._value}`;
+    return this._value;
   }
 }
 

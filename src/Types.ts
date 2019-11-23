@@ -1,12 +1,8 @@
-type Dictionary = {[key: string]: any};
-
-type PrimitiveValue = undefined | null | boolean | number | string;
-type ArrayValue = PrimitiveValue[];
-type DictionaryValue = {[key: string]: LiteralValue};
-type LiteralValue = PrimitiveValue | ArrayValue | DictionaryValue;
-
-
 namespace MVC {
+
+
+export type Dictionary = {[key: string]: any};
+
 
 export class SyntaxError extends Error {
   public constructor(input: string) {
@@ -14,4 +10,8 @@ export class SyntaxError extends Error {
   }
 }
 
+
 }  // namespace MVC
+
+
+type Dictionary = MVC.Dictionary;

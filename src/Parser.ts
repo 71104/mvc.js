@@ -141,5 +141,10 @@ export function interpolate(input: string): NodeInterface {
 }
 
 
+export function compile(expression: NodeInterface): Function {
+  return new Function(`return(${expression.compile()});`);
+}
+
+
 }  // namespace Expressions
 }  // namespace MVC
