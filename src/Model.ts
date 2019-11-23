@@ -75,12 +75,15 @@ class ModelHandler {
   }
 
   public set(target: {}, key: any, value: any, receiver: any): boolean {
-    const oldValue = Reflect.get(this._target, key, receiver);
+    const exists = !Reflect.has(this._target, key);
+    const oldValue = exists ? Reflect.get(this._target, key, receiver) : void 0;
     const childPath = this._path.concat(String(key));
     const wrappedValue = this._model.wrap(childPath, value);
     Reflect.set(this._target, key, wrappedValue, receiver);
     this._model.fire(childPath, wrappedValue, oldValue);
-    this._model.fire(this._path, this._target);
+    if (exists) {
+      this._model.fire(this._path, this._target);
+    }
     return true;
   }
 
