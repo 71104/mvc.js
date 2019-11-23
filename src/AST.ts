@@ -98,7 +98,6 @@ class SubscriptComponent implements PathComponentInterface {
   public constructor(public readonly index: NodeInterface) {}
 
   public equals(other: PathComponentInterface): boolean {
-    // TODO: this is wrong
     return other instanceof SubscriptComponent;
   }
 
@@ -190,5 +189,31 @@ class PipeNode implements NodeInterface {
 
   public compile(): string {
     return `(${this.right.compile()})(${this.left.compile()})`;
+  }
+}
+
+
+class StaticFragmentNode implements NodeInterface {
+  public constructor(public readonly text: string) {}
+
+  public getFreePaths(): FreePath[] {
+    return [];
+  }
+
+  public compile(): string {
+    return JSON.stringify(this.text);
+  }
+}
+
+
+class InterpolatedNode implements NodeInterface {
+  public constructor(public readonly fragments: NodeInterface[]) {}
+
+  public getFreePaths(): FreePath[] {
+    return flatUniquePaths(...this.fragments.map(fragment => fragment.getFreePaths()));
+  }
+
+  public compile(): string {
+    return `(${this.fragments.map(fragment => fragment.compile()).join(')+(')})`;
   }
 }

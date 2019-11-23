@@ -115,10 +115,29 @@ export class Parser {
 }
 
 
-export function compile(expression: string): Function {
-  const parser = new Parser(expression);
-  const node = parser.parse();
-  return new Function(`return(${node.compile()});`);
+export function interpolate(input: string): NodeInterface {
+  const fragments: NodeInterface[] = [];
+  for (let i = 0, text = ''; i < input.length; i++) {
+    if ('{' !== input[i]) {
+      text += input[i];
+    } else if (++i < input.length && '{' === input[i]) {
+      fragments.push(new StaticFragmentNode(text));
+      for (i++, text = ''; i < input.length; i++) {
+        if ('}' !== input[i]) {
+          text += input[i];
+        } else if (++i < input.length && '}' === input[i]) {
+          const parser = new Parser(text);
+          fragments.push(parser.parse());
+          text = '';
+        } else {
+          text += '}' + input[i];
+        }
+      }
+    } else {
+      text += '{' + input[i];
+    }
+  }
+  return new InterpolatedNode(fragments);
 }
 
 
