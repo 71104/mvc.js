@@ -75,7 +75,6 @@ export interface DirectiveConstructorInterface {
 
 export const REGISTRY: MVC.Directives.DirectiveConstructorInterface[] = [
   BindDirective,
-  RootDirective,
 ];
 
 
