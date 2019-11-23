@@ -30,6 +30,16 @@ export class Parser {
         .replace(/\\(.)/g, '$1');
   }
 
+  private _parseReference(): NodeInterface {
+    if ('name' !== this._lexer.token) {
+      throw new MVC.SyntaxError(this.input);
+    }
+    const components = [new FieldComponent(this._lexer.label)];
+    this._lexer.next();
+    // TODO
+    return new ReferenceNode(components);
+  }
+
   private _parseValue(): NodeInterface {
     switch (this._lexer.next()) {
     case 'undefined':
@@ -47,7 +57,7 @@ export class Parser {
       this._lexer.expect('right');
       return node;
     default:
-      throw new MVC.SyntaxError(this.input);
+      return this._parseReference();
     }
   }
 
