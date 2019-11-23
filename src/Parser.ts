@@ -15,6 +15,7 @@ export class Parser {
     ['+', '-'],
     ['<<', '>>', '>>>'],
     ['<', '<=', '>', '>=', 'in'],
+    ['==', '!=', '===', '!=='],
   ];
 
   public constructor(public readonly input: string) {
