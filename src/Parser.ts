@@ -97,7 +97,7 @@ export class Parser {
 export function compile(expression: string): Function {
   const parser = new Parser(expression);
   const node = parser.parse();
-  return new Function(`with(this){return(${node.compile()});}`);
+  return new Function(`return(${node.compile()});`);
 }
 
 
