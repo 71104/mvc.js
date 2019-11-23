@@ -2,6 +2,9 @@
 /// <reference path="Types.ts" />
 
 
+type Model = MVC.Model;
+
+
 class ModelHandler {
   private constructor(
       private readonly _model: Model,
@@ -93,7 +96,10 @@ class ModelHandler {
 }
 
 
-class Model {
+namespace MVC {
+
+
+export class Model {
   private readonly _handlers: EventEmitter = new EventEmitter();
   private readonly _proxy: typeof Proxy;
 
@@ -146,3 +152,6 @@ class Model {
     return this;
   }
 }
+
+
+}  // namespace MVC
