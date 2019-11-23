@@ -10,7 +10,10 @@ gulp.task('compile', function () {
   const project = typescript.createProject('tsconfig.json');
   const tsResult = gulp.src('src/**/*.ts')
       .pipe(project());
-  return merge(tsResult, tsResult.js.pipe(umd()))
+  return merge(tsResult, tsResult.js.pipe(umd({
+    exports: () => 'MVC',
+    namespace: () => 'MVC',
+  })))
       .pipe(gulp.dest('bin'));
 });
 

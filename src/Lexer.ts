@@ -66,7 +66,7 @@ class Lexer {
       this._label = '';
       return this._token = 'end';
     }
-    if (null === this._read(/^\s+/)) {
+    if (null !== this._read(/^\s+/)) {
       return this.next();
     }
     switch (true) {
