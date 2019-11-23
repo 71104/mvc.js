@@ -122,18 +122,20 @@ export function interpolate(input: string): NodeInterface {
       text += input[i];
     } else if (++i < input.length && '{' === input[i]) {
       fragments.push(new StaticFragmentNode(text));
-      for (i++, text = ''; i < input.length; i++) {
-        if ('}' !== input[i]) {
-          text += input[i];
-        } else if (++i < input.length && '}' === input[i]) {
-          const parser = new Parser(text);
-          fragments.push(parser.parse());
-          text = '';
-          break;
-        } else {
-          text += '}' + input[i];
+      fragments.push((function () {
+        for (i++, text = ''; i < input.length; i++) {
+          if ('}' !== input[i]) {
+            text += input[i];
+          } else if (++i < input.length && '}' === input[i]) {
+            const parser = new Parser(text);
+            return parser.parse();
+          } else {
+            text += '}' + input[i];
+          }
         }
-      }
+        throw new MVC.SyntaxError(input);
+      }()));
+      text = '';
     } else {
       text += '{' + input[i];
     }
