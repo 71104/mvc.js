@@ -129,6 +129,7 @@ export function interpolate(input: string): NodeInterface {
           const parser = new Parser(text);
           fragments.push(parser.parse());
           text = '';
+          break;
         } else {
           text += '}' + input[i];
         }
