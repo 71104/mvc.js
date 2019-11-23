@@ -117,7 +117,8 @@ export class Parser {
 
 export function interpolate(input: string): NodeInterface {
   const fragments: NodeInterface[] = [];
-  for (let i = 0, text = ''; i < input.length; i++) {
+  let text = '';
+  for (let i = 0; i < input.length; i++) {
     if ('{' !== input[i]) {
       text += input[i];
     } else if (++i < input.length && '{' === input[i]) {
@@ -140,6 +141,7 @@ export function interpolate(input: string): NodeInterface {
       text += '{' + input[i];
     }
   }
+  fragments.push(new StaticFragmentNode(text));
   return new InterpolatedNode(fragments);
 }
 
