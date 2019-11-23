@@ -31,14 +31,24 @@ export class Parser {
         .replace(/\\(.)/g, '$1');
   }
 
-  private _parseReference(): NodeInterface {
-    if ('name' !== this._lexer.token) {
-      throw new MVC.SyntaxError(this.input);
+  private _parseReferenceComponents(components: PathComponentInterface[]): ReferenceNode {
+    switch (this._lexer.token) {
+    case 'dot':
+      const label = this._lexer.expect('name');
+      return this._parseReferenceComponents(components.concat(new FieldComponent(label)));
+    case 'left-square':
+      this._lexer.next();
+      const index = this._parseRoot();
+      this._lexer.expect('right-square');
+      return this._parseReferenceComponents(components.concat(new SubscriptComponent(index)));
+    default:
+      return new ReferenceNode(components);
     }
-    const components = [new FieldComponent(this._lexer.label)];
-    this._lexer.next();
-    // TODO
-    return new ReferenceNode(components);
+  }
+
+  private _parseReference(): ReferenceNode {
+    const label = this._lexer.expect('name');
+    return this._parseReferenceComponents([new FieldComponent(label)]);
   }
 
   private _parseValue(): NodeInterface {
