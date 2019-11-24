@@ -44,8 +44,8 @@ class ModelHandler {
     const oldValue = Reflect.get(this._target, key);
     const childPath = this._path.concat(String(key));
     Reflect.deleteProperty(this._target, key);
-    this._model.fire(childPath, void 0, oldValue);
     this._model.fire(this._path, this._target);
+    this._model.fireRecursive(childPath, void 0, oldValue);
     return true;
   }
 
@@ -83,10 +83,10 @@ class ModelHandler {
     const childPath = this._path.concat(String(key));
     const wrappedValue = this._model.wrap(childPath, value);
     Reflect.set(this._target, key, wrappedValue, receiver);
-    this._model.fire(childPath, wrappedValue, oldValue);
-    if (exists) {
+    if (!exists) {
       this._model.fire(this._path, this._target);
     }
+    this._model.fireRecursive(childPath, wrappedValue, oldValue);
     return true;
   }
 
@@ -131,24 +131,23 @@ export class Model {
     return this._proxy;
   }
 
-  private _getEventKey(path: string[]): string {
-    return path.map(component => {
-      return component.replace(/\\/g, '\\\\').replace(/\./g, '\\.');
-    }).join('.');
-  }
-
   public on(path: string[], handler: EventHandler): Model {
-    this._handlers.on(this._getEventKey(path), handler);
+    this._handlers.on(path, handler);
     return this;
   }
 
   public off(path: string[], handler: EventHandler): Model {
-    this._handlers.off(this._getEventKey(path), handler);
+    this._handlers.off(path, handler);
     return this;
   }
 
   public fire(path: string[], ...parameters: any[]): Model {
-    this._handlers.fire(this._getEventKey(path), ...parameters);
+    this._handlers.fire(path, ...parameters);
+    return this;
+  }
+
+  public fireRecursive(path: string[], ...parameters: any[]): Model {
+    this._handlers.fireRecursive(path, ...parameters);
     return this;
   }
 }
