@@ -4,52 +4,52 @@
 
 type DirectiveInterface = MVC.Directives.DirectiveInterface;
 type DirectiveChainer = MVC.Directives.DirectiveChainer;
+type DirectiveConstructorInterface = MVC.Directives.DirectiveConstructorInterface;
 
 
 class RootDirective implements DirectiveInterface {
   public static readonly NAME: string = 'root';
 
-  public matches(element: Element): boolean {
+  public static matches(element: Element): boolean {
     return true;
   }
 
-  public bind(model: Model, element: Element): Element[] {
-    return [element];
-  }
+  public constructor() {}
 
-  public unbind(element: Element): void {}
+  public destroy(): void {}
 }
 
 
 class BindDirective implements DirectiveInterface {
   public static readonly NAME: string = 'bind';
 
-  public constructor(private readonly _next: DirectiveChainer) {}
-
-  public matches(element: Element): boolean {
+  public static matches(element: Element): boolean {
     return true;
   }
 
-  public bind(model: Model, element: Element): Element[] {
+  public constructor(
+      public readonly next: DirectiveChainer,
+      public readonly model: Model,
+      public readonly element: Element)
+  {
     for (let i = 0; i < element.attributes.length; i++) {
       const attribute = element.attributes[i];
       if (!attribute.name.startsWith('mvc-')) {
         const expression = MVC.Expressions.interpolate(attribute.value);
         if (!expression.isAllStatic()) {
+          const compiledExpression = MVC.Expressions.compileSafe(expression);
+          attribute.value = compiledExpression.call(model.proxy);
           const freePaths = expression.getFreePaths();
           if (freePaths.length) {
             // TODO
-          } else {
-            const compiledExpression = MVC.Expressions.compileSafe(expression);
-            attribute.value = compiledExpression.call(model.proxy);
           }
         }
       }
     }
-    return this._next(model, element);
+    next(model, element);
   }
 
-  public unbind(element: Element): void {
+  public destroy(): void {
     // TODO
   }
 };
@@ -60,18 +60,17 @@ export namespace Directives {
 
 
 export interface DirectiveInterface {
-  matches(element: Element): boolean;
-  bind(model: Model, element: Element): Element[];
-  unbind(element: Element): void;
+  destroy(): void;
 }
 
 
-export type DirectiveChainer = (model: Model, element: Element) => Element[];
+export type DirectiveChainer = (model: Model, element: Element) => void;
 
 
 export interface DirectiveConstructorInterface {
-  new (next: DirectiveChainer): DirectiveInterface;
   NAME: string;
+  matches(element: Element): boolean;
+  new (next: MVC.Directives.DirectiveChainer, model: Model, element: Element): MVC.Directives.DirectiveInterface;
 }
 
 
