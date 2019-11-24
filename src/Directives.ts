@@ -10,7 +10,7 @@ type DirectiveConstructorInterface = MVC.Directives.DirectiveConstructorInterfac
 class RootDirective implements DirectiveInterface {
   public static readonly NAME: string = 'root';
 
-  public static matches(element: Element): boolean {
+  public static matches(node: Node): boolean {
     return true;
   }
 
@@ -32,15 +32,27 @@ class BindDirective implements DirectiveInterface {
 
   private readonly _watchers: ExpressionWatcher[] = [];
 
-  public static matches(element: Element): boolean {
-    return true;
+  public static matches(node: Node): boolean {
+    return [Node.ELEMENT_NODE, Node.TEXT_NODE].includes(node.nodeType);
   }
 
   public constructor(
       public readonly next: DirectiveChainer,
       private readonly _model: Model,
-      public readonly element: Element)
+      public readonly node: Node)
   {
+    switch (node.nodeType) {
+    case Node.ELEMENT_NODE:
+      this._bindElement(<Element>node);
+      break;
+    case Node.TEXT_NODE:
+      this._bindText(<Text>node);
+      break;
+    }
+    this.next(this._model, this.node);
+  }
+
+  private _bindElement(element: Element): void {
     const model = this._model;
     for (let i = 0; i < element.attributes.length; i++) {
       const attribute = element.attributes[i];
@@ -60,7 +72,23 @@ class BindDirective implements DirectiveInterface {
         }
       }
     }
-    this.next(model, element);
+  }
+
+  private _bindText(text: Text): void {
+    const model = this._model;
+    const expression = MVC.Expressions.interpolate('' + text.textContent);
+    if (!expression.isAllStatic()) {
+      const compiledExpression = MVC.Expressions.compileSafe(expression);
+      text.textContent = compiledExpression.call(model.proxy);
+      expression.getFreePaths().forEach(freePath => {
+        const path = freePath.bind(model.proxy);
+        const handler = (value: any): void => {
+          text.textContent = compiledExpression.call(model.proxy);
+        };
+        this._watchers.push(new ExpressionWatcher(path, handler));
+        this._model.on(path, handler);
+      }, this);
+    }
   }
 
   public destroy(): void {
@@ -81,13 +109,13 @@ export interface DirectiveInterface {
 }
 
 
-export type DirectiveChainer = (model: Model, element: Element) => void;
+export type DirectiveChainer = (model: Model, node: Node) => void;
 
 
 export interface DirectiveConstructorInterface {
   NAME: string;
-  matches(element: Element): boolean;
-  new (next: MVC.Directives.DirectiveChainer, model: Model, element: Element): MVC.Directives.DirectiveInterface;
+  matches(node: Node): boolean;
+  new (next: MVC.Directives.DirectiveChainer, model: Model, node: Node): MVC.Directives.DirectiveInterface;
 }
 
 
