@@ -9,13 +9,13 @@ export namespace Expressions {
 export class Parser {
   private readonly _lexer: Lexer;
 
-  private static readonly _BINARY_OPERATOR_PRECEDENCE_TABLE = [
-    ['**'],
-    ['*', '/', '%'],
-    ['+', '-'],
-    ['<<', '>>', '>>>'],
-    ['<', '<=', '>', '>=', 'in'],
-    ['==', '!=', '===', '!=='],
+  private static readonly _BINARY_OPERATOR_PRECEDENCE_TABLE: [boolean, string[]][] = [
+    [false, ['**']],
+    [true, ['*', '/', '%']],
+    [true, ['+', '-']],
+    [true, ['<<', '>>', '>>>']],
+    [true, ['<', '<=', '>', '>=', 'in']],
+    [true, ['==', '!=', '===', '!==']],
   ];
 
   public constructor(public readonly input: string) {
@@ -87,12 +87,22 @@ export class Parser {
 
   private _parseBinaryNode(precedenceIndex: number): NodeInterface {
     if (precedenceIndex < Parser._BINARY_OPERATOR_PRECEDENCE_TABLE.length) {
-      const left = this._parseBinaryNode(precedenceIndex + 1);
-      const operators = Parser._BINARY_OPERATOR_PRECEDENCE_TABLE[precedenceIndex];
-      if ('operator' !== this._lexer.token || !operators.includes(this._lexer.label)) {
-        return left;
+      const [leftAssociative, operators] = Parser._BINARY_OPERATOR_PRECEDENCE_TABLE[precedenceIndex];
+      if (leftAssociative) {
+        let node = this._parseBinaryNode(precedenceIndex + 1);
+        while ('operator' === this._lexer.token && operators.includes(this._lexer.label)) {
+          const operator = this._lexer.step();
+          node = new BinaryNode(operator, node, this._parseBinaryNode(precedenceIndex + 1));
+        }
+        return node;
       } else {
-        return new BinaryNode(this._lexer.label, left, this._parseBinaryNode(precedenceIndex));
+        const left = this._parseBinaryNode(precedenceIndex + 1);
+        if ('operator' !== this._lexer.token || !operators.includes(this._lexer.label)) {
+          return left;
+        } else {
+          const operator = this._lexer.step();
+          return new BinaryNode(operator, left, this._parseBinaryNode(precedenceIndex));
+        }
       }
     } else {
       return this._parseUnaryNode();
