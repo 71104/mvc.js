@@ -150,10 +150,18 @@ export function compile(expression: NodeInterface): Function {
 }
 
 
-export function compileSafe(expression: NodeInterface): Function {
+export type ExpressionCoercer = ''
+    | 'void'     // undefined
+    | '!!'       // boolean
+    | '~~'       // integer
+    | '+'        // float
+    | 'String';  // string
+
+
+export function compileSafe(coercer: ExpressionCoercer, expression: NodeInterface): Function {
   return new Function(`
     try {
-      return String(${expression.compile()});
+      return ${coercer}(${expression.compile()});
     } catch (e) {
       console.error(e);
       return'';
