@@ -93,21 +93,16 @@ class Lexer {
     }
   }
 
-  public step(expected: Token): boolean {
-    if (expected !== this._token) {
-      return false;
-    } else {
-      this.next();
-      return true;
-    }
+  public step(): string {
+    const label = this._label;
+    this.next();
+    return label;
   }
 
   public expect(...tokens: Token[]): string {
     for (var i = 0; i < tokens.length; i++) {
       if (this._token === tokens[i]) {
-        const label = this._label;
-        this.next();
-        return label;
+        return this.step();
       }
     }
     throw new MVC.SyntaxError(this.originalInput);

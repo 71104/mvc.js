@@ -24,11 +24,7 @@ export class Parser {
   }
 
   private _parseStringLiteral(label: string): string {
-    // TODO: parse escape sequences
-    return label
-        .replace(/^["']/, '')
-        .replace(/["']$/, '')
-        .replace(/\\(.)/g, '$1');
+    return JSON.parse(label);
   }
 
   private _parseReferenceComponents(components: PathComponentInterface[]): ReferenceNode {
@@ -54,15 +50,18 @@ export class Parser {
   private _parseValue(): NodeInterface {
     switch (this._lexer.next()) {
     case 'undefined':
+      this._lexer.next();
       return new LiteralNode(void 0);
     case 'true':
+      this._lexer.next();
       return new LiteralNode(true);
     case 'false':
+      this._lexer.next();
       return new LiteralNode(false);
     case 'number':
-      return new LiteralNode(parseFloat(this._lexer.label));
+      return new LiteralNode(parseFloat(this._lexer.step()));
     case 'string':
-      return new LiteralNode(this._parseStringLiteral(this._lexer.label));
+      return new LiteralNode(this._parseStringLiteral(this._lexer.step()));
     case 'left':
       const node = this._parseRoot();
       this._lexer.expect('right');
