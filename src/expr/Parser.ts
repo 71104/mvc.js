@@ -152,7 +152,14 @@ export function compile(expression: NodeInterface): Function {
 
 
 export function compileSafe(expression: NodeInterface): Function {
-  return new Function(`try{return String(${expression.compile()});}catch(e){return'';}`);
+  return new Function(`
+    try {
+      return String(${expression.compile()});
+    } catch (e) {
+      console.error(e);
+      return'';
+    }
+  `);
 }
 
 
