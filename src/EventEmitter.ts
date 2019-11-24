@@ -1,4 +1,4 @@
-type EventHandler = (key: string, ...parameters: any[]) => void;
+type EventHandler = (...parameters: any[]) => void;
 
 
 class EventEmitter {
@@ -52,7 +52,7 @@ class EventEmitter {
       if (key in this._handlers) {
         const queue = this._handlers[key];
         for (var i = 0; i < queue.length; i++) {
-          queue[i](key, ...parameters);
+          queue[i](...parameters);
         }
       }
     }

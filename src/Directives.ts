@@ -20,8 +20,17 @@ class RootDirective implements DirectiveInterface {
 }
 
 
+class ExpressionWatcher {
+  public constructor(
+      public readonly path: string[],
+      public readonly handler: EventHandler) {}
+}
+
+
 class BindDirective implements DirectiveInterface {
   public static readonly NAME: string = 'bind';
+
+  private readonly _watchers: ExpressionWatcher[] = [];
 
   public static matches(element: Element): boolean {
     return true;
@@ -29,9 +38,10 @@ class BindDirective implements DirectiveInterface {
 
   public constructor(
       public readonly next: DirectiveChainer,
-      public readonly model: Model,
+      private readonly _model: Model,
       public readonly element: Element)
   {
+    const model = this._model;
     for (let i = 0; i < element.attributes.length; i++) {
       const attribute = element.attributes[i];
       if (!attribute.name.startsWith('mvc-')) {
@@ -39,18 +49,25 @@ class BindDirective implements DirectiveInterface {
         if (!expression.isAllStatic()) {
           const compiledExpression = MVC.Expressions.compileSafe(expression);
           attribute.value = compiledExpression.call(model.proxy);
-          const freePaths = expression.getFreePaths();
-          if (freePaths.length) {
-            // TODO
-          }
+          expression.getFreePaths().forEach(freePath => {
+            const path = freePath.bind(model.proxy);
+            const handler = (value: any): void => {
+              attribute.value = compiledExpression.call(model.proxy);
+            };
+            this._watchers.push(new ExpressionWatcher(path, handler));
+            this._model.on(path, handler);
+          }, this);
         }
       }
     }
-    next(model, element);
+    this.next(model, element);
   }
 
   public destroy(): void {
-    // TODO
+    this._watchers.forEach(({path, handler}) => {
+      this._model.off(path, handler);
+    }, this);
+    this._watchers.length = 0;
   }
 };
 

@@ -9,6 +9,7 @@ export interface PathComponentInterface {
   equals(other: PathComponentInterface): boolean;
   getFreePaths(): FreePath[];
   compile(): string;
+  evaluate(data: Dictionary): any;
 }
 
 
@@ -19,6 +20,10 @@ export class FreePath {
     return this.components.every((component, index) => {
       return component.equals(other.components[index]);
     });
+  }
+
+  public bind(data: Dictionary): string[] {
+    return this.components.map(component => String(component.evaluate(data)));
   }
 }
 
@@ -85,6 +90,10 @@ class FieldComponent implements PathComponentInterface {
   public compile(): string {
     return `.${this.name}`;
   }
+
+  public evaluate(data: Dictionary): any {
+    return this.name;
+  }
 }
 
 
@@ -101,6 +110,10 @@ class SubscriptComponent implements PathComponentInterface {
 
   public compile(): string {
     return `[${this.index.compile()}]`;
+  }
+
+  public evaluate(data: Dictionary): any {
+    return MVC.Expressions.compile(this.index).call(data);
   }
 }
 
