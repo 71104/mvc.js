@@ -209,6 +209,10 @@ class StaticFragmentNode implements NodeInterface {
 class InterpolatedNode implements NodeInterface {
   public constructor(public readonly fragments: NodeInterface[]) {}
 
+  public isAllStatic(): boolean {
+    return this.fragments.every(fragment => fragment instanceof StaticFragmentNode);
+  }
+
   public getFreePaths(): FreePath[] {
     return flatUniquePaths(...this.fragments.map(fragment => fragment.getFreePaths()));
   }
