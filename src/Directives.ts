@@ -35,12 +35,14 @@ class BindDirective implements DirectiveInterface {
       const attribute = element.attributes[i];
       if (!attribute.name.startsWith('mvc-')) {
         const expression = MVC.Expressions.interpolate(attribute.value);
-        const freePaths = expression.getFreePaths();
-        if (freePaths.length) {
-          // TODO
-        } else {
-          const compiledExpression = MVC.Expressions.compile(expression);
-          attribute.value = String(compiledExpression.call(model.proxy));
+        if (!expression.isAllStatic()) {
+          const freePaths = expression.getFreePaths();
+          if (freePaths.length) {
+            // TODO
+          } else {
+            const compiledExpression = MVC.Expressions.compileSafe(expression);
+            attribute.value = compiledExpression.call(model.proxy);
+          }
         }
       }
     }

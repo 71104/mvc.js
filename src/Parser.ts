@@ -115,7 +115,7 @@ export class Parser {
 }
 
 
-export function interpolate(input: string): NodeInterface {
+export function interpolate(input: string): InterpolatedNode {
   const fragments: NodeInterface[] = [];
   let text = '';
   for (let i = 0; i < input.length; i++) {
