@@ -1,5 +1,5 @@
 /// <reference path="Model.ts" />
-/// <reference path="Parser.ts" />
+/// <reference path="expr/Parser.ts" />
 
 
 type DirectiveInterface = MVC.Directives.DirectiveInterface;

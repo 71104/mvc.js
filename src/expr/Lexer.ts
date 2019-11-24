@@ -1,4 +1,4 @@
-/// <reference path="Common.ts" />
+/// <reference path="../Common.ts" />
 
 
 type Token = 'begin'

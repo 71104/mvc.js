@@ -1,4 +1,4 @@
-/// <reference path="Common.ts" />
+/// <reference path="../Common.ts" />
 
 
 namespace MVC {
