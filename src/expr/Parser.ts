@@ -48,7 +48,7 @@ export class Parser {
   }
 
   private _parseValue(): NodeInterface {
-    switch (this._lexer.next()) {
+    switch (this._lexer.token) {
     case 'undefined':
       this._lexer.next();
       return new LiteralNode(void 0);
