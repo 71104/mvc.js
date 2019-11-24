@@ -15,3 +15,9 @@ export class SyntaxError extends Error {
 
 
 type Dictionary = MVC.Dictionary;
+
+
+function flatten<ElementType>(...elements: (ElementType | ElementType[])[]): ElementType[] {
+  const array: ElementType[] = [];
+  return array.concat(...elements);
+}

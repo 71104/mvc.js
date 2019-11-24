@@ -1,4 +1,4 @@
-/// <reference path="Types.ts" />
+/// <reference path="Common.ts" />
 
 
 namespace MVC {
@@ -36,12 +36,6 @@ export interface NodeInterface {
 type PathComponentInterface = MVC.Expressions.PathComponentInterface;
 type FreePath = MVC.Expressions.FreePath;
 type NodeInterface = MVC.Expressions.NodeInterface;
-
-
-function flatten<ElementType>(...elements: (ElementType | ElementType[])[]): ElementType[] {
-  const array: ElementType[] = [];
-  return array.concat(...elements);
-}
 
 
 function flatUniquePaths(...elements: (FreePath | FreePath[])[]): FreePath[] {

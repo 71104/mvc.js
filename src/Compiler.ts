@@ -1,4 +1,4 @@
-/// <reference path="Types.ts" />
+/// <reference path="Common.ts" />
 /// <reference path="Model.ts" />
 /// <reference path="Directives.ts" />
 

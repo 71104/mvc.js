@@ -1,5 +1,5 @@
+/// <reference path="Common.ts" />
 /// <reference path="EventEmitter.ts" />
-/// <reference path="Types.ts" />
 
 
 type Model = MVC.Model;
