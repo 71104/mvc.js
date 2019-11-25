@@ -24,7 +24,11 @@ gulp.task('uglify', function () {
       .pipe(gulp.dest('bin'));
 });
 
-gulp.task('default', gulp.series(['compile', 'uglify']));
+gulp.task('test', function () {
+  return gulp.src('test/index.html').pipe(gulp.dest('bin'));
+});
+
+gulp.task('default', gulp.series(['compile', 'uglify', 'test']));
 
 gulp.task('clean', function () {
   return del('bin');
