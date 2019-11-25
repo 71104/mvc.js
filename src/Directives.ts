@@ -30,7 +30,7 @@ export interface DirectiveInterface {
 }
 
 
-export type DirectiveChainer = (model: Model, node: Node) => void;
+export type DirectiveChainer = (model: Model, node: Node) => DirectiveInterface;
 
 
 export interface DirectiveConstructorInterface {

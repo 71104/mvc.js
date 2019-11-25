@@ -124,6 +124,12 @@ export class Parser {
 }
 
 
+export function parse(input: string): NodeInterface {
+  const parser = new MVC.Expressions.Parser(input);
+  return parser.parse();
+}
+
+
 export function interpolate(input: string): InterpolatedNode {
   const fragments: NodeInterface[] = [];
   let text = '';

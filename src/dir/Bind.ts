@@ -1,17 +1,12 @@
 /// <reference path="../expr/Parser.ts" />
-
-
-class ExpressionWatcher {
-  public constructor(
-      public readonly path: string[],
-      public readonly handler: EventHandler) {}
-}
+/// <reference path="../Watcher.ts" />
 
 
 class BindDirective implements DirectiveInterface {
   public static readonly NAME: string = 'bind';
 
   private readonly _watchers: ExpressionWatcher[] = [];
+  private readonly _nextDirective: DirectiveInterface;
 
   public static matches(node: Node): boolean {
     return [Node.ELEMENT_NODE, Node.TEXT_NODE].includes(node.nodeType);
@@ -30,23 +25,22 @@ class BindDirective implements DirectiveInterface {
       this._bindText(<Text>node);
       break;
     }
-    this.next(this._model, this.node);
+    this._nextDirective = this.next(this._model, this.node);
   }
 
   private _bindElement(element: Element): void {
-    const model = this._model;
     for (let i = 0; i < element.attributes.length; i++) {
       const attribute = element.attributes[i];
       if (!attribute.name.startsWith('mvc-')) {
         const expression = MVC.Expressions.interpolate(attribute.value);
         if (!expression.isAllStatic()) {
           const compiledExpression = MVC.Expressions.compileSafeString(expression);
-          attribute.value = compiledExpression.call(model.proxy);
+          attribute.value = compiledExpression.call(this._model.proxy);
+          const handler = ((): void => {
+            attribute.value = compiledExpression.call(this._model.proxy);
+          }).bind(this);
           expression.getFreePaths().forEach(freePath => {
-            const path = freePath.bind(model.proxy);
-            const handler = (value: any): void => {
-              attribute.value = compiledExpression.call(model.proxy);
-            };
+            const path = freePath.bind(this._model.proxy);
             this._watchers.push(new ExpressionWatcher(path, handler));
             this._model.on(path, handler);
           }, this);
@@ -56,16 +50,15 @@ class BindDirective implements DirectiveInterface {
   }
 
   private _bindText(text: Text): void {
-    const model = this._model;
     const expression = MVC.Expressions.interpolate('' + text.textContent);
     if (!expression.isAllStatic()) {
       const compiledExpression = MVC.Expressions.compileSafeString(expression);
-      text.textContent = compiledExpression.call(model.proxy);
+      text.textContent = compiledExpression.call(this._model.proxy);
+      const handler = ((): void => {
+        text.textContent = compiledExpression.call(this._model.proxy);
+      }).bind(this);
       expression.getFreePaths().forEach(freePath => {
-        const path = freePath.bind(model.proxy);
-        const handler = (value: any): void => {
-          text.textContent = compiledExpression.call(model.proxy);
-        };
+        const path = freePath.bind(this._model.proxy);
         this._watchers.push(new ExpressionWatcher(path, handler));
         this._model.on(path, handler);
       }, this);
@@ -73,6 +66,7 @@ class BindDirective implements DirectiveInterface {
   }
 
   public destroy(): void {
+    this._nextDirective.destroy();
     this._watchers.forEach(({path, handler}) => {
       this._model.off(path, handler);
     }, this);
