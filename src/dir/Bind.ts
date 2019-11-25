@@ -40,7 +40,7 @@ class BindDirective implements DirectiveInterface {
       if (!attribute.name.startsWith('mvc-')) {
         const expression = MVC.Expressions.interpolate(attribute.value);
         if (!expression.isAllStatic()) {
-          const compiledExpression = MVC.Expressions.compileSafe('String', expression);
+          const compiledExpression = MVC.Expressions.compileSafeString(expression);
           attribute.value = compiledExpression.call(model.proxy);
           expression.getFreePaths().forEach(freePath => {
             const path = freePath.bind(model.proxy);
@@ -59,7 +59,7 @@ class BindDirective implements DirectiveInterface {
     const model = this._model;
     const expression = MVC.Expressions.interpolate('' + text.textContent);
     if (!expression.isAllStatic()) {
-      const compiledExpression = MVC.Expressions.compileSafe('String', expression);
+      const compiledExpression = MVC.Expressions.compileSafeString(expression);
       text.textContent = compiledExpression.call(model.proxy);
       expression.getFreePaths().forEach(freePath => {
         const path = freePath.bind(model.proxy);

@@ -160,18 +160,57 @@ export function compile(expression: NodeInterface): Function {
 }
 
 
-export type ExpressionCoercer = ''
-    | 'void'     // undefined
-    | '!!'       // boolean
-    | '~~'       // integer
-    | '+'        // float
-    | 'String';  // string
-
-
-export function compileSafe(coercer: ExpressionCoercer, expression: NodeInterface): Function {
+export function compileSafe(expression: NodeInterface): Function {
   return new Function(`
     try {
-      return ${coercer}(${expression.compile()});
+      return(${expression.compile()});
+    } catch (e) {
+      console.error(e);
+    }
+  `);
+}
+
+
+export function compileSafeBoolean(expression: NodeInterface): Function {
+  return new Function(`
+    try {
+      return!!(${expression.compile()});
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  `);
+}
+
+
+export function compileSafeInteger(expression: NodeInterface): Function {
+  return new Function(`
+    try {
+      return~~(${expression.compile()});
+    } catch (e) {
+      console.error(e);
+      return 0;
+    }
+  `);
+}
+
+
+export function compileSafeNumber(expression: NodeInterface): Function {
+  return new Function(`
+    try {
+      return+(${expression.compile()});
+    } catch (e) {
+      console.error(e);
+      return 0;
+    }
+  `);
+}
+
+
+export function compileSafeString(expression: NodeInterface): Function {
+  return new Function(`
+    try {
+      return String(${expression.compile()});
     } catch (e) {
       console.error(e);
       return'';
