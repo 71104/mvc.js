@@ -92,6 +92,7 @@ export class StringWatcher extends Watcher<string> {
 }  // namespace MVC
 
 
+type ValueHandler<ValueType> = MVC.Expressions.ValueHandler<ValueType>;
 type GenericWatcher = MVC.Expressions.GenericWatcher;
 type BooleanWatcher = MVC.Expressions.BooleanWatcher;
 type IntegerWatcher = MVC.Expressions.IntegerWatcher;

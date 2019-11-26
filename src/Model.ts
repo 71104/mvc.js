@@ -1,5 +1,6 @@
 /// <reference path="Common.ts" />
 /// <reference path="EventEmitter.ts" />
+/// <reference path="expr/Watchers.ts" />
 
 
 type Model = MVC.Model;
@@ -149,6 +150,26 @@ export class Model {
   public fireRecursive(path: string[], ...parameters: any[]): Model {
     this._handlers.fireRecursive(path, ...parameters);
     return this;
+  }
+
+  public watch(expression: NodeInterface, handler: ValueHandler<any>): GenericWatcher {
+    return new MVC.Expressions.GenericWatcher(this, expression, handler);
+  }
+
+  public watchBoolean(expression: NodeInterface, handler: ValueHandler<boolean>): BooleanWatcher {
+    return new MVC.Expressions.BooleanWatcher(this, expression, handler);
+  }
+
+  public watchInteger(expression: NodeInterface, handler: ValueHandler<number>): IntegerWatcher {
+    return new MVC.Expressions.IntegerWatcher(this, expression, handler);
+  }
+
+  public watchNumber(expression: NodeInterface, handler: ValueHandler<number>): NumberWatcher {
+    return new MVC.Expressions.NumberWatcher(this, expression, handler);
+  }
+
+  public watchString(expression: NodeInterface, handler: ValueHandler<string>): StringWatcher {
+    return new MVC.Expressions.StringWatcher(this, expression, handler);
   }
 }
 
