@@ -7,7 +7,7 @@
     "url": "git+https://github.com/darblast/mvc.js.git"
   },
   "license": "MIT",
-  "files": ["/bin/"],
+  "files": ["/dist/"],
   "bugs": {
     "url": "https://github.com/darblast/mvc.js/issues"
   },
