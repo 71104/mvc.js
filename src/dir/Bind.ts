@@ -1,11 +1,11 @@
 /// <reference path="../expr/Parser.ts" />
-/// <reference path="../Watcher.ts" />
+/// <reference path="../expr/Watchers.ts" />
 
 
 class BindDirective implements DirectiveInterface {
   public static readonly NAME: string = 'bind';
 
-  private readonly _watchers: PathHandler[] = [];
+  private readonly _watchers: StringWatcher[] = [];
   private readonly _nextDirective: DirectiveInterface;
 
   public static matches(node: Node): boolean {
@@ -34,16 +34,11 @@ class BindDirective implements DirectiveInterface {
       if (!attribute.name.startsWith('mvc-')) {
         const expression = MVC.Expressions.interpolate(attribute.value);
         if (!expression.isAllStatic()) {
-          const compiledExpression = MVC.Expressions.compileSafeString(expression);
-          attribute.value = compiledExpression.call(this._model.proxy);
-          const handler = ((): void => {
-            attribute.value = compiledExpression.call(this._model.proxy);
-          }).bind(this);
-          expression.getFreePaths().forEach(freePath => {
-            const path = freePath.bind(this._model.proxy);
-            this._watchers.push(new PathHandler(path, handler));
-            this._model.on(path, handler);
-          }, this);
+          const watcher = new MVC.Expressions.StringWatcher(this._model, expression, value => {
+            attribute.value = value;
+          });
+          attribute.value = watcher.value;
+          this._watchers.push(watcher);
         }
       }
     }
@@ -52,24 +47,19 @@ class BindDirective implements DirectiveInterface {
   private _bindText(text: Text): void {
     const expression = MVC.Expressions.interpolate('' + text.textContent);
     if (!expression.isAllStatic()) {
-      const compiledExpression = MVC.Expressions.compileSafeString(expression);
-      text.textContent = compiledExpression.call(this._model.proxy);
-      const handler = ((): void => {
-        text.textContent = compiledExpression.call(this._model.proxy);
-      }).bind(this);
-      expression.getFreePaths().forEach(freePath => {
-        const path = freePath.bind(this._model.proxy);
-        this._watchers.push(new PathHandler(path, handler));
-        this._model.on(path, handler);
-      }, this);
+      const watcher = new MVC.Expressions.StringWatcher(this._model, expression, value => {
+        text.textContent = value;
+      });
+      text.textContent = watcher.value;
+      this._watchers.push(watcher);
     }
   }
 
   public destroy(): void {
     this._nextDirective.destroy();
-    this._watchers.forEach(({path, handler}) => {
-      this._model.off(path, handler);
-    }, this);
+    this._watchers.forEach(watcher => {
+      watcher.destroy();
+    });
     this._watchers.length = 0;
   }
 }

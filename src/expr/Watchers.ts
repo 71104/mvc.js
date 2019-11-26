@@ -1,5 +1,8 @@
-/// <reference path="EventEmitter.ts" />
-/// <reference path="Model.ts" />
+/// <reference path="../Model.ts" />
+
+
+namespace MVC {
+export namespace Expressions {
 
 
 class PathHandler {
@@ -9,30 +12,37 @@ class PathHandler {
 }
 
 
-type CompileFunction = (expression: NodeInterface) => Function;
+export type ValueHandler<ValueType> = (value: ValueType) => void;
 
 
-abstract class Watcher {
-  public readonly model: Model;
-  public readonly expression: NodeInterface;
+abstract class Watcher<ValueType> {
   public readonly compiledExpression: Function;
-  public readonly handler: EventHandler;
   private readonly _pathHandlers: PathHandler[];
 
-  public constructor(model: Model, expression: NodeInterface, handler: EventHandler) {
-    this.model = model;
-    this.expression = expression;
+  public constructor(
+      public readonly model: Model,
+      public readonly expression: NodeInterface,
+      public readonly handler: ValueHandler<ValueType>)
+  {
     this.compiledExpression = this._compile(expression);
-    this.handler = handler;
+    this._internalHandler = this._internalHandler.bind(this);
     this._pathHandlers = expression.getFreePaths().map(freePath => {
       // TODO: what if the following binding changes?
       const path = freePath.bind(this.model);
-      this.model.on(path, handler);
-      return new PathHandler(path, handler);
+      this.model.on(path, this._internalHandler);
+      return new PathHandler(path, this._internalHandler);
     });
   }
 
+  private _internalHandler(value: ValueType): void {
+    this.handler(value);
+  }
+
   protected abstract _compile(expression: NodeInterface): Function;
+
+  public get value(): ValueType {
+    return this.compiledExpression.call(this.model.proxy);
+  }
 
   public destroy(): void {
     this._pathHandlers.forEach(({path, handler}) => {
@@ -43,56 +53,47 @@ abstract class Watcher {
 }
 
 
-class GenericWatcher extends Watcher {
+export class GenericWatcher extends Watcher<any> {
   protected _compile(expression: NodeInterface): Function {
     return MVC.Expressions.compileSafe(expression);
   }
-
-  public get value(): any {
-    return this.compiledExpression.call(this.model.proxy);
-  }
 }
 
 
-class BooleanWatcher extends Watcher {
+export class BooleanWatcher extends Watcher<boolean> {
   protected _compile(expression: NodeInterface): Function {
     return MVC.Expressions.compileSafeBoolean(expression);
   }
-
-  public get value(): boolean {
-    return this.compiledExpression.call(this.model.proxy);
-  }
 }
 
 
-class IntegerWatcher extends Watcher {
+export class IntegerWatcher extends Watcher<number> {
   protected _compile(expression: NodeInterface): Function {
     return MVC.Expressions.compileSafeInteger(expression);
   }
-
-  public get value(): number {
-    return this.compiledExpression.call(this.model.proxy);
-  }
 }
 
 
-class NumberWatcher extends Watcher {
+export class NumberWatcher extends Watcher<number> {
   protected _compile(expression: NodeInterface): Function {
     return MVC.Expressions.compileSafeNumber(expression);
   }
-
-  public get value(): number {
-    return this.compiledExpression.call(this.model.proxy);
-  }
 }
 
 
-class StringWatcher extends Watcher {
+export class StringWatcher extends Watcher<string> {
   protected _compile(expression: NodeInterface): Function {
     return MVC.Expressions.compileSafeString(expression);
   }
-
-  public get value(): string {
-    return this.compiledExpression.call(this.model.proxy);
-  }
 }
+
+
+}  // namespace Expressions
+}  // namespace MVC
+
+
+type GenericWatcher = MVC.Expressions.GenericWatcher;
+type BooleanWatcher = MVC.Expressions.BooleanWatcher;
+type IntegerWatcher = MVC.Expressions.IntegerWatcher;
+type NumberWatcher = MVC.Expressions.NumberWatcher;
+type StringWatcher = MVC.Expressions.StringWatcher;

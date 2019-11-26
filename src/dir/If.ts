@@ -1,13 +1,13 @@
 /// <reference path="../expr/Parser.ts" />
-/// <reference path="../Watcher.ts" />
+/// <reference path="../expr/Watchers.ts" />
 
 
 class IfDirective implements DirectiveInterface {
   public static readonly NAME = 'if';
 
   private readonly _marker: Comment;
+  private readonly _watcher: BooleanWatcher;
   private _nextDirective: DirectiveInterface | null = null;
-  private readonly _watchers: PathHandler[] = [];
 
   public static matches(node: Node): boolean {
     return Node.ELEMENT_NODE === node.nodeType && (<Element>node).hasAttribute('mvc-if');
@@ -27,9 +27,7 @@ class IfDirective implements DirectiveInterface {
     this._marker = document.createComment(`mvc-if: ${JSON.stringify(expression)}`);
     parentNode.insertBefore(element, this._marker);
     const parsedExpression = MVC.Expressions.parse(expression);
-    const compiledExpression = MVC.Expressions.compileSafeBoolean(parsedExpression);
-    const handler = ((): void => {
-      const value = compiledExpression.call(this._model.proxy);
+    this._watcher = new MVC.Expressions.BooleanWatcher(this._model, parsedExpression, ((value: boolean) => {
       if (value !== this.status) {
         if (value) {
           parentNode.insertBefore(this._marker.nextSibling!, element);
@@ -40,13 +38,8 @@ class IfDirective implements DirectiveInterface {
           parentNode.removeChild(element);
         }
       }
-    }).bind(this);
-    parsedExpression.getFreePaths().forEach(freePath => {
-      const path = freePath.bind(this._model);
-      this._watchers.push(new PathHandler(path, handler));
-      this._model.on(path, handler);
-    });
-    if (compiledExpression.call(this._model.proxy)) {
+    }).bind(this));
+    if (this._watcher.value) {
       this._nextDirective = this.next(this._model, this.node);
     } else {
       parentNode.removeChild(element);
@@ -61,10 +54,7 @@ class IfDirective implements DirectiveInterface {
     if (null !== this._nextDirective) {
       this._nextDirective.destroy();
       this._nextDirective = null;
-      this._watchers.forEach(({path, handler}) => {
-        this._model.off(path, handler);
-      }, this);
-      this._watchers.length = 0;
+      this._watcher.destroy();
     }
   }
 }
