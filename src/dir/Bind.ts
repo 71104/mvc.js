@@ -34,7 +34,7 @@ class BindDirective implements DirectiveInterface {
       if (!attribute.name.startsWith('mvc-')) {
         const expression = MVC.Expressions.interpolate(attribute.value);
         if (!expression.isAllStatic()) {
-          const watcher = new MVC.Expressions.StringWatcher(this._model, expression, value => {
+          const watcher = this._model.watchString(expression, value => {
             attribute.value = value;
           });
           attribute.value = watcher.value;
@@ -47,7 +47,7 @@ class BindDirective implements DirectiveInterface {
   private _bindText(text: Text): void {
     const expression = MVC.Expressions.interpolate('' + text.textContent);
     if (!expression.isAllStatic()) {
-      const watcher = new MVC.Expressions.StringWatcher(this._model, expression, value => {
+      const watcher = this._model.watchString(expression, value => {
         text.textContent = value;
       });
       text.textContent = watcher.value;

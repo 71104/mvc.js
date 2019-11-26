@@ -27,7 +27,7 @@ class IfDirective implements DirectiveInterface {
     this._marker = document.createComment(`mvc-if: ${JSON.stringify(expression)}`);
     parentNode.insertBefore(element, this._marker);
     const parsedExpression = MVC.Expressions.parse(expression);
-    this._watcher = new MVC.Expressions.BooleanWatcher(this._model, parsedExpression, ((value: boolean) => {
+    this._watcher = this._model.watchBoolean(parsedExpression, ((value: boolean) => {
       if (value !== this.status) {
         if (value) {
           parentNode.insertBefore(this._marker.nextSibling!, element);
