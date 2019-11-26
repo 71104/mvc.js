@@ -5,7 +5,7 @@
 class BindDirective implements DirectiveInterface {
   public static readonly NAME: string = 'bind';
 
-  private readonly _watchers: ExpressionWatcher[] = [];
+  private readonly _watchers: PathHandler[] = [];
   private readonly _nextDirective: DirectiveInterface;
 
   public static matches(node: Node): boolean {
@@ -41,7 +41,7 @@ class BindDirective implements DirectiveInterface {
           }).bind(this);
           expression.getFreePaths().forEach(freePath => {
             const path = freePath.bind(this._model.proxy);
-            this._watchers.push(new ExpressionWatcher(path, handler));
+            this._watchers.push(new PathHandler(path, handler));
             this._model.on(path, handler);
           }, this);
         }
@@ -59,7 +59,7 @@ class BindDirective implements DirectiveInterface {
       }).bind(this);
       expression.getFreePaths().forEach(freePath => {
         const path = freePath.bind(this._model.proxy);
-        this._watchers.push(new ExpressionWatcher(path, handler));
+        this._watchers.push(new PathHandler(path, handler));
         this._model.on(path, handler);
       }, this);
     }

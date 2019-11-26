@@ -7,7 +7,7 @@ class IfDirective implements DirectiveInterface {
 
   private readonly _marker: Comment;
   private _nextDirective: DirectiveInterface | null = null;
-  private readonly _watchers: ExpressionWatcher[] = [];
+  private readonly _watchers: PathHandler[] = [];
 
   public static matches(node: Node): boolean {
     return Node.ELEMENT_NODE === node.nodeType && (<Element>node).hasAttribute('mvc-if');
@@ -43,7 +43,7 @@ class IfDirective implements DirectiveInterface {
     }).bind(this);
     parsedExpression.getFreePaths().forEach(freePath => {
       const path = freePath.bind(this._model);
-      this._watchers.push(new ExpressionWatcher(path, handler));
+      this._watchers.push(new PathHandler(path, handler));
       this._model.on(path, handler);
     });
     if (compiledExpression.call(this._model.proxy)) {
