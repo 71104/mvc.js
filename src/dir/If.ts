@@ -25,12 +25,12 @@ class IfDirective implements DirectiveInterface {
       throw new Error(`element with mvc-if=${JSON.stringify(expression)} is an orphan`);
     }
     this._marker = document.createComment(`mvc-if: ${JSON.stringify(expression)}`);
-    parentNode.insertBefore(element, this._marker);
+    parentNode.insertBefore(this._marker, element);
     const parsedExpression = MVC.Expressions.parse(expression);
     this._watcher = this._model.watchBoolean(parsedExpression, ((value: boolean) => {
       if (value !== this.status) {
         if (value) {
-          parentNode.insertBefore(this._marker.nextSibling!, element);
+          parentNode.insertBefore(element, this._marker.nextSibling);
           this._nextDirective = this.next(this._model, this.node);
         } else {
           this._nextDirective!.destroy();
