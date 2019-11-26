@@ -14,22 +14,22 @@ gulp.task('compile', function () {
     exports: () => 'MVC',
     namespace: () => 'MVC',
   })))
-      .pipe(gulp.dest('bin'));
+      .pipe(gulp.dest('dist'));
 });
 
 gulp.task('uglify', function () {
-  return gulp.src('bin/mvc.js')
+  return gulp.src('dist/mvc.js')
       .pipe(uglify())
       .pipe(rename('mvc.min.js'))
-      .pipe(gulp.dest('bin'));
+      .pipe(gulp.dest('dist'));
 });
 
 gulp.task('test', function () {
-  return gulp.src('test/index.html').pipe(gulp.dest('bin'));
+  return gulp.src('test/index.html').pipe(gulp.dest('dist'));
 });
 
 gulp.task('default', gulp.series(['compile', 'uglify', 'test']));
 
 gulp.task('clean', function () {
-  return del('bin');
+  return del('dist');
 });
