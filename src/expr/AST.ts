@@ -228,3 +228,18 @@ class InterpolatedNode implements NodeInterface {
     return `(${this.fragments.map(fragment => fragment.compile()).join(')+(')})`;
   }
 }
+
+
+class CollectionIterationNode {
+  public constructor(
+      public readonly elementName: string,
+      public readonly collection: NodeInterface) {}
+}
+
+
+class DictionaryIterationNode {
+  public constructor(
+      public readonly keyName: string,
+      public readonly valueName: string,
+      public readonly dictionary: NodeInterface) {}
+}

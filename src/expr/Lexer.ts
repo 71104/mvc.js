@@ -5,11 +5,13 @@ type Token = 'begin'
   | 'undefined'
   | 'true'
   | 'false'
+  | 'in'
   | 'name'
   | 'dot'
   | 'number'
   | 'string'
   | 'operator'
+  | 'comma'
   | 'left'
   | 'right'
   | 'left-square'
@@ -73,7 +75,7 @@ class Lexer {
     case this._match('undefined', /^undefined/):
     case this._match('true', /^true/):
     case this._match('false', /^false/):
-    case this._match('operator', /^in\b/):
+    case this._match('in', /^in\b/):
     case this._match('name', /^[A-Za-z_][A-Za-z0-9_]*/):
     case this._match('dot', /^\./):
     case this._match('number', /^[0-9]+/):
@@ -82,6 +84,7 @@ class Lexer {
     case this._match('operator', /^\>\>\>|\=\=\=|\!\=\=/):
     case this._match('operator', /^\*\*|\<\<|\>\>|\<\=|\>\=|\=\=|\!\=|\?\?|\&\&|\|\|/):
     case this._match('operator', /^\+|\-|\*|\/|\%|\<|\>|\!/):
+    case this._match('comma', /^,/):
     case this._match('left', /^\(/):
     case this._match('right', /^\)/):
     case this._match('left-square', /^\[/):

@@ -90,14 +90,18 @@ export class Parser {
       const [leftAssociative, operators] = Parser._BINARY_OPERATOR_PRECEDENCE_TABLE[precedenceIndex];
       if (leftAssociative) {
         let node = this._parseBinaryNode(precedenceIndex + 1);
-        while ('operator' === this._lexer.token && operators.includes(this._lexer.label)) {
+        while (['operator', 'in'].includes(this._lexer.token) &&
+            operators.includes(this._lexer.label))
+        {
           const operator = this._lexer.step();
           node = new BinaryNode(operator, node, this._parseBinaryNode(precedenceIndex + 1));
         }
         return node;
       } else {
         const left = this._parseBinaryNode(precedenceIndex + 1);
-        if ('operator' !== this._lexer.token || !operators.includes(this._lexer.label)) {
+        if (!['operator', 'in'].includes(this._lexer.token) ||
+            !operators.includes(this._lexer.label))
+        {
           return left;
         } else {
           const operator = this._lexer.step();
@@ -118,6 +122,30 @@ export class Parser {
     if (this._lexer.end) {
       return node;
     } else {
+      throw new MVC.SyntaxError(this.input);
+    }
+  }
+
+  private _parseCollectionIteration(name: string): CollectionIterationNode {
+    return new CollectionIterationNode(name, this.parse());
+  }
+
+  private _parseDictionaryIteration(keyName: string): DictionaryIterationNode {
+    const valueName = this._lexer.expect('name');
+    this._lexer.expect('in');
+    return new DictionaryIterationNode(keyName, valueName, this.parse());
+  }
+
+  public parseIteration(): CollectionIterationNode | DictionaryIterationNode {
+    const name = this._lexer.expect('name');
+    switch (this._lexer.token) {
+    case 'comma':
+      this._lexer.next();
+      return this._parseDictionaryIteration(name);
+    case 'in':
+      this._lexer.next();
+      return this._parseCollectionIteration(name);
+    default:
       throw new MVC.SyntaxError(this.input);
     }
   }
