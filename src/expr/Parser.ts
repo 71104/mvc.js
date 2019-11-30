@@ -189,67 +189,67 @@ export function interpolate(input: string): InterpolatedNode {
 }
 
 
-export function compile(expression: NodeInterface): Function {
-  return new Function(`return(${expression.compile()});`);
+export function compile(expression: NodeInterface): () => any {
+  return <() => any>(new Function(`return(${expression.compile()});`));
 }
 
 
-export function compileSafe(expression: NodeInterface): Function {
-  return new Function(`
+export function compileSafe(expression: NodeInterface): () => any {
+  return <() => any>(new Function(`
     try {
       return(${expression.compile()});
     } catch (e) {
       console.error(e);
     }
-  `);
+  `));
 }
 
 
-export function compileSafeBoolean(expression: NodeInterface): Function {
-  return new Function(`
+export function compileSafeBoolean(expression: NodeInterface): () => boolean {
+  return <() => boolean>(new Function(`
     try {
       return!!(${expression.compile()});
     } catch (e) {
       console.error(e);
       return false;
     }
-  `);
+  `));
 }
 
 
-export function compileSafeInteger(expression: NodeInterface): Function {
-  return new Function(`
+export function compileSafeInteger(expression: NodeInterface): () => number {
+  return <() => number>(new Function(`
     try {
       return~~(${expression.compile()});
     } catch (e) {
       console.error(e);
       return 0;
     }
-  `);
+  `));
 }
 
 
-export function compileSafeNumber(expression: NodeInterface): Function {
-  return new Function(`
+export function compileSafeNumber(expression: NodeInterface): () => number {
+  return <() => number>(new Function(`
     try {
       return+(${expression.compile()});
     } catch (e) {
       console.error(e);
       return 0;
     }
-  `);
+  `));
 }
 
 
-export function compileSafeString(expression: NodeInterface): Function {
-  return new Function(`
+export function compileSafeString(expression: NodeInterface): () => string {
+  return <() => string>(new Function(`
     try {
       return String(${expression.compile()});
     } catch (e) {
       console.error(e);
       return'';
     }
-  `);
+  `));
 }
 
 
