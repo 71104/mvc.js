@@ -132,6 +132,18 @@ export class Model {
     return this._proxy;
   }
 
+  public push(key: string, value: any): void {
+    // TODO
+  }
+
+  public pushMany(data: Dictionary): void {
+    // TODO
+  }
+
+  public pop(): void {
+    // TODO
+  }
+
   public on(path: string[], handler: EventHandler): Model {
     this._handlers.on(path, handler);
     return this;

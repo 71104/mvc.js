@@ -1,6 +1,7 @@
 /// <reference path="Model.ts" />
 /// <reference path="dir/Bind.ts" />
 /// <reference path="dir/If.ts" />
+/// <reference path="dir/For.ts" />
 
 
 type DirectiveInterface = MVC.Directives.DirectiveInterface;
@@ -41,6 +42,7 @@ export interface DirectiveConstructorInterface {
 
 
 export const REGISTRY: MVC.Directives.DirectiveConstructorInterface[] = [
+  ForDirective,
   IfDirective,
   BindDirective,
 ];
