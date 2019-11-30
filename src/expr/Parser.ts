@@ -253,5 +253,17 @@ export function compileSafeString(expression: NodeInterface): Function {
 }
 
 
+export function compileSafeCollection(expression: NodeInterface): () => any[] {
+  return <() => any[]>(new Function(`
+    try {
+      return [].concat(${expression.compile()});
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  `));
+}
+
+
 }  // namespace Expressions
 }  // namespace MVC

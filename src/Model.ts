@@ -144,6 +144,24 @@ export class Model {
     // TODO
   }
 
+  public frame<ReturnType>(key: string, value: any, section: () => ReturnType): ReturnType {
+    try {
+      this.push(key, value);
+      return section();
+    } finally {
+      this.pop();
+    }
+  }
+
+  public frameMany<ReturnType>(data: Dictionary, section: () => ReturnType): ReturnType {
+    try {
+      this.pushMany(data);
+      return section();
+    } finally {
+      this.pop();
+    }
+  }
+
   public on(path: string[], handler: EventHandler): Model {
     this._handlers.on(path, handler);
     return this;

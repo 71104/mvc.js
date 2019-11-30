@@ -18,7 +18,7 @@ class IfDirective implements DirectiveInterface {
       private readonly _model: Model,
       public readonly node: Node)
   {
-    const element = <Element>node;
+    const element = <Element>this.node;
     const expression = String(element.getAttribute('mvc-if'));
     const parentNode = element.parentNode;
     if (!parentNode) {
