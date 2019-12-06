@@ -189,12 +189,15 @@ export function interpolate(input: string): InterpolatedNode {
 }
 
 
-export function compile(expression: NodeInterface): () => any {
+export type CompiledExpression<ValueType> = (this: Dictionary) => ValueType;
+
+
+export function compile(expression: NodeInterface): CompiledExpression<any> {
   return <() => any>(new Function(`return(${expression.compile()});`));
 }
 
 
-export function compileSafe(expression: NodeInterface): () => any {
+export function compileSafe(expression: NodeInterface): CompiledExpression<any> {
   return <() => any>(new Function(`
     try {
       return(${expression.compile()});
@@ -205,7 +208,7 @@ export function compileSafe(expression: NodeInterface): () => any {
 }
 
 
-export function compileSafeBoolean(expression: NodeInterface): () => boolean {
+export function compileSafeBoolean(expression: NodeInterface): CompiledExpression<boolean> {
   return <() => boolean>(new Function(`
     try {
       return!!(${expression.compile()});
@@ -217,7 +220,7 @@ export function compileSafeBoolean(expression: NodeInterface): () => boolean {
 }
 
 
-export function compileSafeInteger(expression: NodeInterface): () => number {
+export function compileSafeInteger(expression: NodeInterface): CompiledExpression<number> {
   return <() => number>(new Function(`
     try {
       return~~(${expression.compile()});
@@ -229,7 +232,7 @@ export function compileSafeInteger(expression: NodeInterface): () => number {
 }
 
 
-export function compileSafeNumber(expression: NodeInterface): () => number {
+export function compileSafeNumber(expression: NodeInterface): CompiledExpression<number> {
   return <() => number>(new Function(`
     try {
       return+(${expression.compile()});
@@ -241,7 +244,7 @@ export function compileSafeNumber(expression: NodeInterface): () => number {
 }
 
 
-export function compileSafeString(expression: NodeInterface): () => string {
+export function compileSafeString(expression: NodeInterface): CompiledExpression<string> {
   return <() => string>(new Function(`
     try {
       return String(${expression.compile()});
@@ -253,7 +256,7 @@ export function compileSafeString(expression: NodeInterface): () => string {
 }
 
 
-export function compileSafeCollection(expression: NodeInterface): () => any[] {
+export function compileSafeCollection(expression: NodeInterface): CompiledExpression<any[]> {
   return <() => any[]>(new Function(`
     try {
       return [].concat(${expression.compile()});
@@ -267,3 +270,6 @@ export function compileSafeCollection(expression: NodeInterface): () => any[] {
 
 }  // namespace Expressions
 }  // namespace MVC
+
+
+type CompiledExpression<ValueType> = MVC.Expressions.CompiledExpression<ValueType>;

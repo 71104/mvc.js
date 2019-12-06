@@ -16,7 +16,7 @@ export type ValueHandler<ValueType> = (newValue: ValueType, oldValue: ValueType)
 
 
 abstract class Watcher<ValueType> {
-  public readonly compiledExpression: Function;
+  public readonly compiledExpression: CompiledExpression<ValueType>;
   private readonly _pathHandlers: PathHandler[];
 
   public constructor(
@@ -43,7 +43,7 @@ abstract class Watcher<ValueType> {
     this.handler(newValue, oldValue);
   }
 
-  protected abstract _compile(expression: NodeInterface): () => ValueType;
+  protected abstract _compile(expression: NodeInterface): CompiledExpression<ValueType>;
 
   public get value(): ValueType {
     return this.compiledExpression.call(this.model.proxy);
@@ -59,35 +59,35 @@ abstract class Watcher<ValueType> {
 
 
 export class GenericWatcher extends Watcher<any> {
-  protected _compile(expression: NodeInterface): () => any {
+  protected _compile(expression: NodeInterface): CompiledExpression<any> {
     return MVC.Expressions.compileSafe(expression);
   }
 }
 
 
 export class BooleanWatcher extends Watcher<boolean> {
-  protected _compile(expression: NodeInterface): () => boolean {
+  protected _compile(expression: NodeInterface): CompiledExpression<boolean> {
     return MVC.Expressions.compileSafeBoolean(expression);
   }
 }
 
 
 export class IntegerWatcher extends Watcher<number> {
-  protected _compile(expression: NodeInterface): () => number {
+  protected _compile(expression: NodeInterface): CompiledExpression<number> {
     return MVC.Expressions.compileSafeInteger(expression);
   }
 }
 
 
 export class NumberWatcher extends Watcher<number> {
-  protected _compile(expression: NodeInterface): () => number {
+  protected _compile(expression: NodeInterface): CompiledExpression<number> {
     return MVC.Expressions.compileSafeNumber(expression);
   }
 }
 
 
 export class StringWatcher extends Watcher<string> {
-  protected _compile(expression: NodeInterface): () => string {
+  protected _compile(expression: NodeInterface): CompiledExpression<string> {
     return MVC.Expressions.compileSafeString(expression);
   }
 }
