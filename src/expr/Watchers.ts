@@ -43,7 +43,7 @@ abstract class Watcher<ValueType> {
     this.handler(newValue, oldValue);
   }
 
-  protected abstract _compile(expression: NodeInterface): Function;
+  protected abstract _compile(expression: NodeInterface): () => ValueType;
 
   public get value(): ValueType {
     return this.compiledExpression.call(this.model.proxy);
@@ -59,35 +59,35 @@ abstract class Watcher<ValueType> {
 
 
 export class GenericWatcher extends Watcher<any> {
-  protected _compile(expression: NodeInterface): Function {
+  protected _compile(expression: NodeInterface): () => any {
     return MVC.Expressions.compileSafe(expression);
   }
 }
 
 
 export class BooleanWatcher extends Watcher<boolean> {
-  protected _compile(expression: NodeInterface): Function {
+  protected _compile(expression: NodeInterface): () => boolean {
     return MVC.Expressions.compileSafeBoolean(expression);
   }
 }
 
 
 export class IntegerWatcher extends Watcher<number> {
-  protected _compile(expression: NodeInterface): Function {
+  protected _compile(expression: NodeInterface): () => number {
     return MVC.Expressions.compileSafeInteger(expression);
   }
 }
 
 
 export class NumberWatcher extends Watcher<number> {
-  protected _compile(expression: NodeInterface): Function {
+  protected _compile(expression: NodeInterface): () => number {
     return MVC.Expressions.compileSafeNumber(expression);
   }
 }
 
 
 export class StringWatcher extends Watcher<string> {
-  protected _compile(expression: NodeInterface): Function {
+  protected _compile(expression: NodeInterface): () => string {
     return MVC.Expressions.compileSafeString(expression);
   }
 }
