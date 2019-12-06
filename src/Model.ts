@@ -183,23 +183,43 @@ export class Model {
   }
 
   public watch(expression: NodeInterface, handler: ValueHandler<any>): GenericWatcher {
-    return new MVC.Expressions.GenericWatcher(this, expression, handler);
+    return new MVC.Expressions.GenericWatcher(this, expression, false, handler);
   }
 
   public watchBoolean(expression: NodeInterface, handler: ValueHandler<boolean>): BooleanWatcher {
-    return new MVC.Expressions.BooleanWatcher(this, expression, handler);
+    return new MVC.Expressions.BooleanWatcher(this, expression, false, handler);
   }
 
   public watchInteger(expression: NodeInterface, handler: ValueHandler<number>): IntegerWatcher {
-    return new MVC.Expressions.IntegerWatcher(this, expression, handler);
+    return new MVC.Expressions.IntegerWatcher(this, expression, false, handler);
   }
 
   public watchNumber(expression: NodeInterface, handler: ValueHandler<number>): NumberWatcher {
-    return new MVC.Expressions.NumberWatcher(this, expression, handler);
+    return new MVC.Expressions.NumberWatcher(this, expression, false, handler);
   }
 
   public watchString(expression: NodeInterface, handler: ValueHandler<string>): StringWatcher {
-    return new MVC.Expressions.StringWatcher(this, expression, handler);
+    return new MVC.Expressions.StringWatcher(this, expression, false, handler);
+  }
+
+  public watchImmediate(expression: NodeInterface, handler: ValueHandler<any>): GenericWatcher {
+    return new MVC.Expressions.GenericWatcher(this, expression, true, handler);
+  }
+
+  public watchBooleanImmediate(expression: NodeInterface, handler: ValueHandler<boolean>): BooleanWatcher {
+    return new MVC.Expressions.BooleanWatcher(this, expression, true, handler);
+  }
+
+  public watchIntegerImmediate(expression: NodeInterface, handler: ValueHandler<number>): IntegerWatcher {
+    return new MVC.Expressions.IntegerWatcher(this, expression, true, handler);
+  }
+
+  public watchNumberImmediate(expression: NodeInterface, handler: ValueHandler<number>): NumberWatcher {
+    return new MVC.Expressions.NumberWatcher(this, expression, true, handler);
+  }
+
+  public watchStringImmediate(expression: NodeInterface, handler: ValueHandler<string>): StringWatcher {
+    return new MVC.Expressions.StringWatcher(this, expression, true, handler);
   }
 }
 

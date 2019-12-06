@@ -34,11 +34,9 @@ class BindDirective implements DirectiveInterface {
       if (!attribute.name.startsWith('mvc-')) {
         const expression = MVC.Expressions.interpolate(attribute.value);
         if (!expression.isAllStatic()) {
-          const watcher = this._model.watchString(expression, value => {
+          this._watchers.push(this._model.watchStringImmediate(expression, value => {
             attribute.value = value;
-          });
-          attribute.value = watcher.value;
-          this._watchers.push(watcher);
+          }));
         }
       }
     }
@@ -47,11 +45,9 @@ class BindDirective implements DirectiveInterface {
   private _bindText(text: Text): void {
     const expression = MVC.Expressions.interpolate('' + text.textContent);
     if (!expression.isAllStatic()) {
-      const watcher = this._model.watchString(expression, value => {
+      this._watchers.push(this._model.watchStringImmediate(expression, value => {
         text.textContent = value;
-      });
-      text.textContent = watcher.value;
-      this._watchers.push(watcher);
+      }));
     }
   }
 

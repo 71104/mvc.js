@@ -12,7 +12,7 @@ class PathHandler {
 }
 
 
-export type ValueHandler<ValueType> = (value: ValueType) => void;
+export type ValueHandler<ValueType> = (newValue: ValueType, oldValue: ValueType) => void;
 
 
 abstract class Watcher<ValueType> {
@@ -22,6 +22,7 @@ abstract class Watcher<ValueType> {
   public constructor(
       public readonly model: Model,
       public readonly expression: NodeInterface,
+      immediate: boolean,
       public readonly handler: ValueHandler<ValueType>)
   {
     this.compiledExpression = this._compile(expression);
@@ -32,10 +33,14 @@ abstract class Watcher<ValueType> {
       this.model.on(path, this._internalHandler);
       return new PathHandler(path, this._internalHandler);
     });
+    const value = this.value;
+    if (immediate) {
+      this._internalHandler(value, value);
+    }
   }
 
-  private _internalHandler(value: ValueType): void {
-    this.handler(value);
+  private _internalHandler(newValue: ValueType, oldValue: ValueType): void {
+    this.handler(newValue, oldValue);
   }
 
   protected abstract _compile(expression: NodeInterface): Function;
