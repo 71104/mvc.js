@@ -9,7 +9,7 @@ class Replica {
 }
 
 
-class ForDirective extends MVC.Directives.BaseDirective implements DirectiveInterface {
+class ForDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME: string = 'for';
 
   private readonly _parentNode: Node;

@@ -1,7 +1,7 @@
 /// <reference path="../Directives.ts" />
 
 
-class RootDirective extends MVC.Directives.BaseDirective implements DirectiveInterface {
+class RootDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME: string = 'root';
 
   private readonly _children: DirectiveInterface[] = [];

@@ -2,7 +2,7 @@
 /// <reference path="../expr/Parser.ts" />
 
 
-class BindDirective extends MVC.Directives.BaseDirective implements DirectiveInterface {
+class BindDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME: string = 'bind';
 
   private _nextDirective: DirectiveInterface | null;

@@ -2,7 +2,7 @@
 /// <reference path="../expr/Parser.ts" />
 
 
-class IfDirective extends MVC.Directives.BaseDirective implements DirectiveInterface {
+class IfDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME = 'if';
 
   private readonly _marker: Comment;
