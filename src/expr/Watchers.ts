@@ -23,24 +23,20 @@ abstract class Watcher<ValueType> {
       public readonly model: Model,
       public readonly expression: NodeInterface,
       immediate: boolean,
-      public readonly handler: ValueHandler<ValueType>)
+      private readonly _handler: ValueHandler<ValueType>,
+      scope: object | null = null)
   {
     this.compiledExpression = this._compile(expression);
-    this._internalHandler = this._internalHandler.bind(this);
     this._pathHandlers = expression.getFreePaths().map(freePath => {
       // TODO: what if the following binding changes?
       const path = freePath.bind(this.model);
-      this.model.on(path, this._internalHandler);
-      return new PathHandler(path, this._internalHandler);
+      this.model.on(path, this._handler, scope);
+      return new PathHandler(path, this._handler);
     });
     const value = this.value;
     if (immediate) {
-      this._internalHandler(value, value);
+      this._handler.call(scope, value, value);
     }
-  }
-
-  private _internalHandler(newValue: ValueType, oldValue: ValueType): void {
-    this.handler(newValue, oldValue);
   }
 
   protected abstract _compile(expression: NodeInterface): CompiledExpression<ValueType>;

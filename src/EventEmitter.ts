@@ -1,11 +1,18 @@
 type EventHandler = (...parameters: any[]) => void;
 
 
+class HandlerClosure {
+  public constructor(
+      public readonly handler: EventHandler,
+      public readonly scope: object | null) {}
+}
+
+
 class EventEmitter {
   private readonly _children: {[key: string]: EventEmitter} = Object.create(null);
-  private readonly _handlers: {[key: string]: EventHandler[]} = Object.create(null);
+  private readonly _handlers: {[key: string]: HandlerClosure[]} = Object.create(null);
 
-  public on(path: string[], handler: EventHandler): EventEmitter {
+  public on(path: string[], handler: EventHandler, scope: object | null = null): EventEmitter {
     if (path.length > 1) {
       const key = path[0];
       if (!(key in this._children)) {
@@ -17,7 +24,7 @@ class EventEmitter {
       if (!(key in this._handlers)) {
         this._handlers[key] = [];
       }
-      this._handlers[key].push(handler);
+      this._handlers[key].push(new HandlerClosure(handler, scope));
     }
     return this;
   }
@@ -32,7 +39,7 @@ class EventEmitter {
       const key = path[0];
       if (key in this._handlers) {
         const queue = this._handlers[key];
-        const index = queue.indexOf(handler);
+        const index = queue.findIndex(closure => closure.handler === handler);
         if (index >= 0) {
           queue.splice(index, 1);
         }
@@ -52,7 +59,8 @@ class EventEmitter {
       if (key in this._handlers) {
         const queue = this._handlers[key];
         for (var i = 0; i < queue.length; i++) {
-          queue[i](...parameters);
+          const closure = queue[i];
+          closure.handler.call(closure.scope, ...parameters);
         }
       }
     }

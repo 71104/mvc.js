@@ -27,7 +27,7 @@ class IfDirective implements DirectiveInterface {
     this._marker = document.createComment(`mvc-if: ${JSON.stringify(expression)}`);
     parentNode.insertBefore(this._marker, element);
     const parsedExpression = MVC.Expressions.parse(expression);
-    this._watcher = this._model.watchBoolean(parsedExpression, ((value: boolean) => {
+    this._watcher = this._model.watchBoolean(parsedExpression, value => {
       if (value !== this.status) {
         if (value) {
           parentNode.insertBefore(element, this._marker.nextSibling);
@@ -38,7 +38,7 @@ class IfDirective implements DirectiveInterface {
           parentNode.removeChild(element);
         }
       }
-    }).bind(this));
+    }, this);
     if (this._watcher.value) {
       this._nextDirective = this.next(this._model, this.node);
     } else {
