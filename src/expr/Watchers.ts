@@ -24,7 +24,7 @@ abstract class Watcher<ValueType> {
       public readonly expression: NodeInterface,
       immediate: boolean,
       private readonly _handler: ValueHandler<ValueType>,
-      scope: object | null = null)
+      scope: any = null)
   {
     this.compiledExpression = this._compile(expression);
     this._pathHandlers = expression.getFreePaths().map(freePath => {

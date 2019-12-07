@@ -4,7 +4,7 @@ type EventHandler = (...parameters: any[]) => void;
 class HandlerClosure {
   public constructor(
       public readonly handler: EventHandler,
-      public readonly scope: object | null) {}
+      public readonly scope: any) {}
 }
 
 
@@ -12,7 +12,7 @@ class EventEmitter {
   private readonly _children: {[key: string]: EventEmitter} = Object.create(null);
   private readonly _handlers: {[key: string]: HandlerClosure[]} = Object.create(null);
 
-  public on(path: string[], handler: EventHandler, scope: object | null = null): EventEmitter {
+  public on(path: string[], handler: EventHandler, scope: any = null): EventEmitter {
     if (path.length > 1) {
       const key = path[0];
       if (!(key in this._children)) {
