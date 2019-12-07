@@ -1,6 +1,5 @@
 /// <reference path="Common.ts" />
 /// <reference path="EventEmitter.ts" />
-/// <reference path="expr/Watchers.ts" />
 
 
 type Model = MVC.Model;
@@ -182,54 +181,6 @@ export class Model {
   public fireRecursive(path: string[], ...parameters: any[]): Model {
     this._handlers.fireRecursive(path, ...parameters);
     return this;
-  }
-
-  public watch(expression: NodeInterface, handler: ValueHandler<any>, scope: any = null): GenericWatcher {
-    return new MVC.Expressions.GenericWatcher(this, expression, false, handler, scope);
-  }
-
-  public watchBoolean(expression: NodeInterface, handler: ValueHandler<boolean>, scope: any = null): BooleanWatcher {
-    return new MVC.Expressions.BooleanWatcher(this, expression, false, handler, scope);
-  }
-
-  public watchInteger(expression: NodeInterface, handler: ValueHandler<number>, scope: any = null): IntegerWatcher {
-    return new MVC.Expressions.IntegerWatcher(this, expression, false, handler, scope);
-  }
-
-  public watchNumber(expression: NodeInterface, handler: ValueHandler<number>, scope: any = null): NumberWatcher {
-    return new MVC.Expressions.NumberWatcher(this, expression, false, handler, scope);
-  }
-
-  public watchString(expression: NodeInterface, handler: ValueHandler<string>, scope: any = null): StringWatcher {
-    return new MVC.Expressions.StringWatcher(this, expression, false, handler, scope);
-  }
-
-  public watchCollection(expression: NodeInterface, handler: ValueHandler<any[]>, scope: any = null): CollectionWatcher {
-    return new MVC.Expressions.CollectionWatcher(this, expression, false, handler, scope);
-  }
-
-  public watchImmediate(expression: NodeInterface, handler: ValueHandler<any>, scope: any = null): GenericWatcher {
-    return new MVC.Expressions.GenericWatcher(this, expression, true, handler, scope);
-  }
-
-  public watchBooleanImmediate(expression: NodeInterface, handler: ValueHandler<boolean>, scope: any = null): BooleanWatcher {
-    return new MVC.Expressions.BooleanWatcher(this, expression, true, handler, scope);
-  }
-
-  public watchIntegerImmediate(expression: NodeInterface, handler: ValueHandler<number>, scope: any = null): IntegerWatcher {
-    return new MVC.Expressions.IntegerWatcher(this, expression, true, handler, scope);
-  }
-
-  public watchNumberImmediate(expression: NodeInterface, handler: ValueHandler<number>, scope: any = null): NumberWatcher {
-    return new MVC.Expressions.NumberWatcher(this, expression, true, handler, scope);
-  }
-
-  public watchStringImmediate(expression: NodeInterface, handler: ValueHandler<string>, scope: any = null): StringWatcher {
-    return new MVC.Expressions.StringWatcher(this, expression, true, handler, scope);
-  }
-
-  public watchCollectionImmediate(expression: NodeInterface, handler: ValueHandler<any[]>, scope: any = null): CollectionWatcher {
-    return new MVC.Expressions.CollectionWatcher(this, expression, true, handler, scope);
   }
 }
 

@@ -15,7 +15,12 @@ class PathHandler {
 export type ValueHandler<ValueType> = (newValue: ValueType, oldValue: ValueType) => void;
 
 
-abstract class Watcher<ValueType> {
+export interface WatcherInterface {
+  destroy(): void;
+}
+
+
+abstract class Watcher<ValueType> implements WatcherInterface {
   public readonly compiledExpression: CompiledExpression<ValueType>;
   private readonly _pathHandlers: PathHandler[];
 
@@ -101,6 +106,7 @@ export class CollectionWatcher extends Watcher<any[]> {
 
 
 type ValueHandler<ValueType> = MVC.Expressions.ValueHandler<ValueType>;
+type WatcherInterface = MVC.Expressions.WatcherInterface;
 type GenericWatcher = MVC.Expressions.GenericWatcher;
 type BooleanWatcher = MVC.Expressions.BooleanWatcher;
 type IntegerWatcher = MVC.Expressions.IntegerWatcher;

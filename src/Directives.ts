@@ -1,25 +1,13 @@
+/// <reference path="EventEmitter.ts" />
 /// <reference path="Model.ts" />
-/// <reference path="dir/Bind.ts" />
-/// <reference path="dir/If.ts" />
-/// <reference path="dir/For.ts" />
+/// <reference path="expr/AST.ts" />
+/// <reference path="expr/Watchers.ts" />
 
 
 type DirectiveInterface = MVC.Directives.DirectiveInterface;
+type BaseDirective = MVC.Directives.BaseDirective;
 type DirectiveChainer = MVC.Directives.DirectiveChainer;
 type DirectiveConstructorInterface = MVC.Directives.DirectiveConstructorInterface;
-
-
-class RootDirective implements DirectiveInterface {
-  public static readonly NAME: string = 'root';
-
-  public static matches(node: Node): boolean {
-    return true;
-  }
-
-  public constructor() {}
-
-  public destroy(): void {}
-}
 
 
 namespace MVC {
@@ -37,15 +25,78 @@ export type DirectiveChainer = (model: Model, node: Node) => DirectiveInterface;
 export interface DirectiveConstructorInterface {
   NAME: string;
   matches(node: Node): boolean;
-  new (next: MVC.Directives.DirectiveChainer, model: Model, node: Node): MVC.Directives.DirectiveInterface;
+  new (next: DirectiveChainer, model: Model, node: Node): DirectiveInterface;
 }
 
 
-export const REGISTRY: MVC.Directives.DirectiveConstructorInterface[] = [
-  ForDirective,
-  IfDirective,
-  BindDirective,
-];
+export class BaseDirective implements DirectiveInterface {
+  private readonly _watchers: WatcherInterface[] = [];
+
+  protected constructor(
+      public readonly next: DirectiveChainer,
+      public readonly model: Model,
+      public readonly node: Node) {}
+
+  private _register<WatcherType extends WatcherInterface>(watcher: WatcherType): WatcherType {
+    this._watchers.push(watcher);
+    return watcher;
+  }
+
+  public watch(expression: NodeInterface, handler: ValueHandler<any>, scope: any = null): GenericWatcher {
+    return this._register(new MVC.Expressions.GenericWatcher(this.model, expression, false, handler, scope));
+  }
+
+  public watchBoolean(expression: NodeInterface, handler: ValueHandler<boolean>, scope: any = null): BooleanWatcher {
+    return this._register(new MVC.Expressions.BooleanWatcher(this.model, expression, false, handler, scope));
+  }
+
+  public watchInteger(expression: NodeInterface, handler: ValueHandler<number>, scope: any = null): IntegerWatcher {
+    return this._register(new MVC.Expressions.IntegerWatcher(this.model, expression, false, handler, scope));
+  }
+
+  public watchNumber(expression: NodeInterface, handler: ValueHandler<number>, scope: any = null): NumberWatcher {
+    return this._register(new MVC.Expressions.NumberWatcher(this.model, expression, false, handler, scope));
+  }
+
+  public watchString(expression: NodeInterface, handler: ValueHandler<string>, scope: any = null): StringWatcher {
+    return this._register(new MVC.Expressions.StringWatcher(this.model, expression, false, handler, scope));
+  }
+
+  public watchCollection(expression: NodeInterface, handler: ValueHandler<any[]>, scope: any = null): CollectionWatcher {
+    return this._register(new MVC.Expressions.CollectionWatcher(this.model, expression, false, handler, scope));
+  }
+
+  public watchImmediate(expression: NodeInterface, handler: ValueHandler<any>, scope: any = null): GenericWatcher {
+    return this._register(new MVC.Expressions.GenericWatcher(this.model, expression, true, handler, scope));
+  }
+
+  public watchBooleanImmediate(expression: NodeInterface, handler: ValueHandler<boolean>, scope: any = null): BooleanWatcher {
+    return this._register(new MVC.Expressions.BooleanWatcher(this.model, expression, true, handler, scope));
+  }
+
+  public watchIntegerImmediate(expression: NodeInterface, handler: ValueHandler<number>, scope: any = null): IntegerWatcher {
+    return this._register(new MVC.Expressions.IntegerWatcher(this.model, expression, true, handler, scope));
+  }
+
+  public watchNumberImmediate(expression: NodeInterface, handler: ValueHandler<number>, scope: any = null): NumberWatcher {
+    return this._register(new MVC.Expressions.NumberWatcher(this.model, expression, true, handler, scope));
+  }
+
+  public watchStringImmediate(expression: NodeInterface, handler: ValueHandler<string>, scope: any = null): StringWatcher {
+    return this._register(new MVC.Expressions.StringWatcher(this.model, expression, true, handler, scope));
+  }
+
+  public watchCollectionImmediate(expression: NodeInterface, handler: ValueHandler<any[]>, scope: any = null): CollectionWatcher {
+    return this._register(new MVC.Expressions.CollectionWatcher(this.model, expression, true, handler, scope));
+  }
+
+  public destroy(): void {
+    this._watchers.forEach(watcher => {
+      watcher.destroy();
+    });
+    this._watchers.length = 0;
+  }
+}
 
 
 }  // namespace Directives

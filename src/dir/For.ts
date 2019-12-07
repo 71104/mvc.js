@@ -1,5 +1,5 @@
-/// <reference path="../Model.ts" />
-/// <reference path="../expr/AST.ts" />
+/// <reference path="../Directives.ts" />
+/// <reference path="../expr/Parser.ts" />
 
 
 class Replica {
@@ -9,23 +9,19 @@ class Replica {
 }
 
 
-class ForDirective implements DirectiveInterface {
+class ForDirective extends MVC.Directives.BaseDirective implements DirectiveInterface {
   public static readonly NAME: string = 'for';
 
   private readonly _parentNode: Node;
   private readonly _marker: Node;
   private _replicas: Replica[] = [];
-  private readonly _watcher: CollectionWatcher;
 
   public static matches(node: Node): boolean {
     return Node.ELEMENT_NODE === node.nodeType && (<Element>node).hasAttribute('mvc-for');
   }
 
-  public constructor(
-      public readonly next: DirectiveChainer,
-      private readonly _model: Model,
-      public readonly node: Node)
-  {
+  public constructor(next: DirectiveChainer, model: Model, node: Node) {
+    super(next, model, node);
     const element = <Element>this.node;
     const expression = String(element.getAttribute('mvc-for'));
     if (!this.node.parentNode) {
@@ -38,7 +34,7 @@ class ForDirective implements DirectiveInterface {
     this._parentNode.removeChild(element);
     const parsedExpression = MVC.Expressions.parse(expression);
     if (parsedExpression instanceof CollectionIterationNode) {
-      this._watcher = this._model.watchCollectionImmediate(parsedExpression, collection => {
+      this.watchCollectionImmediate(parsedExpression, collection => {
         this._destroyReplicas();
         const nextSibling = this._marker.nextSibling;
         this._replicas = collection.map((element, index) => {
@@ -47,12 +43,12 @@ class ForDirective implements DirectiveInterface {
           const childScope: Dictionary = {};
           childScope[parsedExpression.elementName] = element;
           childScope['$index'] = index;
-          const nextDirective = this.next(this._model.extend(childScope), node);
+          const nextDirective = this.next(this.model.extend(childScope), node);
           return new Replica(node, nextDirective);
         }, this);
       }, this);
     } else {
-      // TODO
+      // TODO: dictionary iterations
     }
   }
 
@@ -65,7 +61,7 @@ class ForDirective implements DirectiveInterface {
   }
 
   public destroy(): void {
-    this._watcher.destroy();
+    super.destroy();
     this._destroyReplicas();
   }
 }

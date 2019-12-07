@@ -1,22 +1,18 @@
+/// <reference path="../Directives.ts" />
 /// <reference path="../expr/Parser.ts" />
-/// <reference path="../expr/Watchers.ts" />
 
 
-class BindDirective implements DirectiveInterface {
+class BindDirective extends MVC.Directives.BaseDirective implements DirectiveInterface {
   public static readonly NAME: string = 'bind';
 
-  private readonly _watchers: StringWatcher[] = [];
   private readonly _nextDirective: DirectiveInterface;
 
   public static matches(node: Node): boolean {
     return [Node.ELEMENT_NODE, Node.TEXT_NODE].includes(node.nodeType);
   }
 
-  public constructor(
-      public readonly next: DirectiveChainer,
-      private readonly _model: Model,
-      public readonly node: Node)
-  {
+  public constructor(next: DirectiveChainer, model: Model, node: Node) {
+    super(next, model, node);
     switch (node.nodeType) {
     case Node.ELEMENT_NODE:
       this._bindElement(<Element>node);
@@ -25,7 +21,7 @@ class BindDirective implements DirectiveInterface {
       this._bindText(<Text>node);
       break;
     }
-    this._nextDirective = this.next(this._model, this.node);
+    this._nextDirective = this.next(this.model, this.node);
   }
 
   private _bindElement(element: Element): void {
@@ -34,9 +30,9 @@ class BindDirective implements DirectiveInterface {
       if (!attribute.name.startsWith('mvc-')) {
         const expression = MVC.Expressions.interpolate(attribute.value);
         if (!expression.isAllStatic()) {
-          this._watchers.push(this._model.watchStringImmediate(expression, value => {
+          this.watchStringImmediate(expression, value => {
             attribute.value = value;
-          }));
+          });
         }
       }
     }
@@ -45,17 +41,9 @@ class BindDirective implements DirectiveInterface {
   private _bindText(text: Text): void {
     const expression = MVC.Expressions.interpolate('' + text.textContent);
     if (!expression.isAllStatic()) {
-      this._watchers.push(this._model.watchStringImmediate(expression, value => {
+      this.watchStringImmediate(expression, value => {
         text.textContent = value;
-      }));
+      });
     }
-  }
-
-  public destroy(): void {
-    this._nextDirective.destroy();
-    this._watchers.forEach(watcher => {
-      watcher.destroy();
-    });
-    this._watchers.length = 0;
   }
 }
