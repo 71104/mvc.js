@@ -10,7 +10,7 @@ class ModelHandler {
   private constructor(
       public readonly model: Model,
       public readonly path: string[],
-      public readonly target: {}) {}
+      public readonly target: object) {}
 
   public static createForObject(model: Model, path: string[], data: Dictionary) {
     const wrapped = Object.create(null);
@@ -33,19 +33,19 @@ class ModelHandler {
     return new ModelHandler(model, path, Object.create(data));
   }
 
-  public apply(target: {}, thisArgument: any, argumentList: any[]): any {
+  public apply(target: object, thisArgument: any, argumentList: any[]): any {
     throw new TypeError('cannot invoke model object');
   }
 
-  public construct(target: {}, argumentList: any[], newTarget: any): any {
+  public construct(target: object, argumentList: any[], newTarget: any): any {
     throw new TypeError('cannot use new operator on model object');
   }
 
-  public defineProperty(target: {}, key: any, descriptor: {}): boolean {
+  public defineProperty(target: object, key: any, descriptor: object): boolean {
     return false;
   }
 
-  public deleteProperty(target: {}, key: any): boolean {
+  public deleteProperty(target: object, key: any): boolean {
     const oldValue = Reflect.get(this.target, key);
     const childPath = this.path.concat(String(key));
     Reflect.deleteProperty(this.target, key);
@@ -54,35 +54,35 @@ class ModelHandler {
     return true;
   }
 
-  public get(target: {}, key: any, receiver: any): any {
+  public get(target: object, key: any, receiver: any): any {
     return Reflect.get(this.target, key, receiver);
   }
 
-  public getOwnPropertyDescriptor(target: {}, key: any) {
+  public getOwnPropertyDescriptor(target: object, key: any) {
     return Reflect.getOwnPropertyDescriptor(this.target, key);
   }
 
-  public getPrototypeOf(target: {}) {
+  public getPrototypeOf(target: object) {
     return Reflect.getPrototypeOf(this.target);
   }
 
-  public has(target: {}, key: any): boolean {
+  public has(target: object, key: any): boolean {
     return Reflect.has(this.target, key);
   }
 
-  public isExtensible(target: {}): boolean {
+  public isExtensible(target: object): boolean {
     return Reflect.isExtensible(this.target);
   }
 
-  public ownKeys(target: {}) {
+  public ownKeys(target: object) {
     return Reflect.ownKeys(this.target);
   }
 
-  public preventExtensions(target: {}): boolean {
+  public preventExtensions(target: object): boolean {
     return Reflect.preventExtensions(this.target);
   }
 
-  public set(target: {}, key: any, value: any, receiver: any): boolean {
+  public set(target: object, key: any, value: any, receiver: any): boolean {
     const exists = !Reflect.has(this.target, key);
     const oldValue = exists ? Reflect.get(this.target, key, receiver) : void 0;
     const childPath = this.path.concat(String(key));
@@ -95,7 +95,7 @@ class ModelHandler {
     return true;
   }
 
-  public setPrototypeOf(target: {}, prototype: {}): boolean {
+  public setPrototypeOf(target: object, prototype: object): boolean {
     return false;
   }
 }
