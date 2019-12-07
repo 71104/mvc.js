@@ -144,19 +144,19 @@ export class Model {
     // TODO
   }
 
-  public frame<ReturnType>(key: string, value: any, section: () => ReturnType): ReturnType {
+  public frame<ReturnType>(key: string, value: any, section: () => ReturnType, scope: object | null = null): ReturnType {
     try {
       this.push(key, value);
-      return section();
+      return section.call(scope);
     } finally {
       this.pop();
     }
   }
 
-  public frameMany<ReturnType>(data: Dictionary, section: () => ReturnType): ReturnType {
+  public frameMany<ReturnType>(data: Dictionary, section: () => ReturnType, scope: object | null = null): ReturnType {
     try {
       this.pushMany(data);
-      return section();
+      return section.call(scope);
     } finally {
       this.pop();
     }

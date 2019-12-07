@@ -43,11 +43,11 @@ class ForDirective implements DirectiveInterface {
         const childScope: Dictionary = {};
         childScope[parsedExpression.elementName] = element;
         childScope['$index'] = index;
-        return this._model.frameMany(childScope, (() => {
+        return this._model.frameMany(childScope, () => {
           this._parentNode.insertBefore(node, this._marker.nextSibling);
           const nextDirective = this.next(this._model, node);
           return new Replica(node, nextDirective);
-        }).bind(this));
+        }, this);
       }, this);
     } else {
       // TODO
