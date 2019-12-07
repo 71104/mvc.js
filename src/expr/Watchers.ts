@@ -89,6 +89,13 @@ export class StringWatcher extends Watcher<string> {
 }
 
 
+export class CollectionWatcher extends Watcher<any[]> {
+  protected _compile(expression: NodeInterface): CompiledExpression<any[]> {
+    return MVC.Expressions.compileSafeCollection(expression);
+  }
+}
+
+
 }  // namespace Expressions
 }  // namespace MVC
 
@@ -99,3 +106,4 @@ type BooleanWatcher = MVC.Expressions.BooleanWatcher;
 type IntegerWatcher = MVC.Expressions.IntegerWatcher;
 type NumberWatcher = MVC.Expressions.NumberWatcher;
 type StringWatcher = MVC.Expressions.StringWatcher;
+type CollectionWatcher = MVC.Expressions.CollectionWatcher;

@@ -204,6 +204,10 @@ export class Model {
     return new MVC.Expressions.StringWatcher(this, expression, false, handler, scope);
   }
 
+  public watchCollection(expression: NodeInterface, handler: ValueHandler<any[]>, scope: object | null = null): CollectionWatcher {
+    return new MVC.Expressions.CollectionWatcher(this, expression, false, handler, scope);
+  }
+
   public watchImmediate(expression: NodeInterface, handler: ValueHandler<any>, scope: object | null = null): GenericWatcher {
     return new MVC.Expressions.GenericWatcher(this, expression, true, handler, scope);
   }
@@ -222,6 +226,10 @@ export class Model {
 
   public watchStringImmediate(expression: NodeInterface, handler: ValueHandler<string>, scope: object | null = null): StringWatcher {
     return new MVC.Expressions.StringWatcher(this, expression, true, handler, scope);
+  }
+
+  public watchCollectionImmediate(expression: NodeInterface, handler: ValueHandler<any[]>, scope: object | null = null): CollectionWatcher {
+    return new MVC.Expressions.CollectionWatcher(this, expression, true, handler, scope);
   }
 }
 

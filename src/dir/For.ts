@@ -14,7 +14,8 @@ class ForDirective implements DirectiveInterface {
 
   private readonly _parentNode: Node;
   private readonly _marker: Node;
-  private readonly _replicas: Replica[];
+  private _replicas: Replica[] = [];
+  private readonly _watcher: CollectionWatcher;
 
   public static matches(node: Node): boolean {
     return Node.ELEMENT_NODE === node.nodeType && (<Element>node).hasAttribute('mvc-for');
@@ -37,26 +38,34 @@ class ForDirective implements DirectiveInterface {
     this._parentNode.removeChild(element);
     const parsedExpression = MVC.Expressions.parse(expression);
     if (parsedExpression instanceof CollectionIterationNode) {
-      const compiledExpression = MVC.Expressions.compileSafeCollection(parsedExpression);
-      this._replicas = compiledExpression.call(this._model).map((element: any, index: number) => {
-        const node = this.node.cloneNode(true);
-        this._parentNode.insertBefore(node, this._marker.nextSibling);
-        const childScope: Dictionary = {};
-        childScope[parsedExpression.elementName] = element;
-        childScope['$index'] = index;
-        const nextDirective = this.next(this._model.extend(childScope), node);
-        return new Replica(node, nextDirective);
+      this._watcher = this._model.watchCollectionImmediate(parsedExpression, collection => {
+        this._destroyReplicas();
+        const nextSibling = this._marker.nextSibling;
+        this._replicas = collection.map((element, index) => {
+          const node = this.node.cloneNode(true);
+          this._parentNode.insertBefore(node, nextSibling);
+          const childScope: Dictionary = {};
+          childScope[parsedExpression.elementName] = element;
+          childScope['$index'] = index;
+          const nextDirective = this.next(this._model.extend(childScope), node);
+          return new Replica(node, nextDirective);
+        }, this);
       }, this);
     } else {
       // TODO
     }
   }
 
-  public destroy(): void {
+  private _destroyReplicas(): void {
     this._replicas.forEach(replica => {
       replica.nextDirective.destroy();
       this._parentNode.removeChild(replica.node);
     }, this);
     this._replicas.length = 0;
+  }
+
+  public destroy(): void {
+    this._watcher.destroy();
+    this._destroyReplicas();
   }
 }
