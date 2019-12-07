@@ -48,7 +48,7 @@ class IfDirective extends MVC.Directives.BaseDirective implements DirectiveInter
 
   public destroy(): void {
     super.destroy();
-    if (null !== this._nextDirective) {
+    if (this._nextDirective) {
       this._nextDirective.destroy();
       this._nextDirective = null;
     }

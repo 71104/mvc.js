@@ -5,7 +5,7 @@
 class BindDirective extends MVC.Directives.BaseDirective implements DirectiveInterface {
   public static readonly NAME: string = 'bind';
 
-  private readonly _nextDirective: DirectiveInterface;
+  private _nextDirective: DirectiveInterface | null;
 
   public static matches(node: Node): boolean {
     return [Node.ELEMENT_NODE, Node.TEXT_NODE].includes(node.nodeType);
@@ -44,6 +44,14 @@ class BindDirective extends MVC.Directives.BaseDirective implements DirectiveInt
       this.watchStringImmediate(expression, value => {
         text.textContent = value;
       });
+    }
+  }
+
+  public destroy(): void {
+    super.destroy();
+    if (this._nextDirective) {
+      this._nextDirective.destroy();
+      this._nextDirective = null;
     }
   }
 }
