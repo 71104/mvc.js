@@ -8,9 +8,9 @@ type Model = MVC.Model;
 
 class ModelHandler {
   private constructor(
-      private readonly _model: Model,
-      private readonly _path: string[],
-      private readonly _target: {}) {}
+      public readonly model: Model,
+      public readonly path: string[],
+      public readonly target: {}) {}
 
   public static createForObject(model: Model, path: string[], data: Dictionary) {
     const wrapped = Object.create(null);
@@ -29,6 +29,10 @@ class ModelHandler {
     }));
   }
 
+  public static createWithPrototype(model: Model, path: string[], data: object) {
+    return new ModelHandler(model, path, Object.create(data));
+  }
+
   public apply(target: {}, thisArgument: any, argumentList: any[]): any {
     throw new TypeError('cannot invoke model object');
   }
@@ -42,52 +46,52 @@ class ModelHandler {
   }
 
   public deleteProperty(target: {}, key: any): boolean {
-    const oldValue = Reflect.get(this._target, key);
-    const childPath = this._path.concat(String(key));
-    Reflect.deleteProperty(this._target, key);
-    this._model.fire(this._path, this._target);
-    this._model.fireRecursive(childPath, void 0, oldValue);
+    const oldValue = Reflect.get(this.target, key);
+    const childPath = this.path.concat(String(key));
+    Reflect.deleteProperty(this.target, key);
+    this.model.fire(this.path, this.target);
+    this.model.fireRecursive(childPath, void 0, oldValue);
     return true;
   }
 
   public get(target: {}, key: any, receiver: any): any {
-    return Reflect.get(this._target, key, receiver);
+    return Reflect.get(this.target, key, receiver);
   }
 
   public getOwnPropertyDescriptor(target: {}, key: any) {
-    return Reflect.getOwnPropertyDescriptor(this._target, key);
+    return Reflect.getOwnPropertyDescriptor(this.target, key);
   }
 
   public getPrototypeOf(target: {}) {
-    return Reflect.getPrototypeOf(this._target);
+    return Reflect.getPrototypeOf(this.target);
   }
 
   public has(target: {}, key: any): boolean {
-    return Reflect.has(this._target, key);
+    return Reflect.has(this.target, key);
   }
 
   public isExtensible(target: {}): boolean {
-    return Reflect.isExtensible(this._target);
+    return Reflect.isExtensible(this.target);
   }
 
   public ownKeys(target: {}) {
-    return Reflect.ownKeys(this._target);
+    return Reflect.ownKeys(this.target);
   }
 
   public preventExtensions(target: {}): boolean {
-    return Reflect.preventExtensions(this._target);
+    return Reflect.preventExtensions(this.target);
   }
 
   public set(target: {}, key: any, value: any, receiver: any): boolean {
-    const exists = !Reflect.has(this._target, key);
-    const oldValue = exists ? Reflect.get(this._target, key, receiver) : void 0;
-    const childPath = this._path.concat(String(key));
-    const wrappedValue = this._model.wrap(childPath, value);
-    Reflect.set(this._target, key, wrappedValue, receiver);
+    const exists = !Reflect.has(this.target, key);
+    const oldValue = exists ? Reflect.get(this.target, key, receiver) : void 0;
+    const childPath = this.path.concat(String(key));
+    const wrappedValue = this.model.wrap(childPath, value);
+    Reflect.set(this.target, key, wrappedValue, receiver);
     if (!exists) {
-      this._model.fire(this._path, this._target);
+      this.model.fire(this.path, this.target);
     }
-    this._model.fireRecursive(childPath, wrappedValue, oldValue);
+    this.model.fireRecursive(childPath, wrappedValue, oldValue);
     return true;
   }
 
@@ -102,7 +106,7 @@ namespace MVC {
 
 export class Model {
   private readonly _handlers: EventEmitter = new EventEmitter();
-  private readonly _proxy: typeof Proxy;
+  public readonly proxy: object;
 
   public wrap(path: string[], value: any): any {
     switch (typeof value){
@@ -124,42 +128,34 @@ export class Model {
     }
   }
 
-  public constructor(data: Dictionary) {
-    this._proxy = this.wrap([], data);
-  }
-
-  public get proxy(): typeof Proxy {
-    return this._proxy;
-  }
-
-  public push(key: string, value: any): void {
-    // TODO
-  }
-
-  public pushMany(data: Dictionary): void {
-    // TODO
-  }
-
-  public pop(): void {
-    // TODO
-  }
-
-  public frame<ReturnType>(key: string, value: any, section: () => ReturnType, scope: object | null = null): ReturnType {
-    try {
-      this.push(key, value);
-      return section.call(scope);
-    } finally {
-      this.pop();
+  private constructor(data: object, extend: boolean) {
+    if (extend) {
+      const handler = ModelHandler.createWithPrototype(this, [], data);
+      this.proxy = new Proxy<object>(handler.target, handler);
+    } else {
+      this.proxy = <object>(this.wrap([], data));
     }
   }
 
-  public frameMany<ReturnType>(data: Dictionary, section: () => ReturnType, scope: object | null = null): ReturnType {
-    try {
-      this.pushMany(data);
-      return section.call(scope);
-    } finally {
-      this.pop();
+  public static create(data: Dictionary): Model {
+    return new Model(data, false);
+  }
+
+  public extend(data: Dictionary): Model {
+    const childScope = new Model(this.proxy, true);
+    const childProxy: Dictionary = childScope.proxy;
+    for (var key in data) {
+      if (data.hasOwnProperty(key)) {
+        childProxy[key] = data[key];
+      }
     }
+    return childScope;
+  }
+
+  public extendWith(key: string, value: any): Model {
+    const data: Dictionary = {};
+    data[key] = value;
+    return this.extend(data);
   }
 
   public on(path: string[], handler: EventHandler, scope: object | null = null): Model {

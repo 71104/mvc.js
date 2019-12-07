@@ -40,14 +40,12 @@ class ForDirective implements DirectiveInterface {
       const compiledExpression = MVC.Expressions.compileSafeCollection(parsedExpression);
       this._replicas = compiledExpression.call(this._model).map((element: any, index: number) => {
         const node = this.node.cloneNode(true);
+        this._parentNode.insertBefore(node, this._marker.nextSibling);
         const childScope: Dictionary = {};
         childScope[parsedExpression.elementName] = element;
         childScope['$index'] = index;
-        return this._model.frameMany(childScope, () => {
-          this._parentNode.insertBefore(node, this._marker.nextSibling);
-          const nextDirective = this.next(this._model, node);
-          return new Replica(node, nextDirective);
-        }, this);
+        const nextDirective = this.next(this._model.extend(childScope), node);
+        return new Replica(node, nextDirective);
       }, this);
     } else {
       // TODO
