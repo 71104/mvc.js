@@ -60,7 +60,7 @@ class EventEmitter {
         const queue = this._handlers[key];
         for (var i = 0; i < queue.length; i++) {
           const closure = queue[i];
-          closure.handler.call(closure.scope, ...parameters);
+          closure.handler.apply(closure.scope, parameters);
         }
       }
     }
