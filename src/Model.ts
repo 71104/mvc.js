@@ -12,6 +12,10 @@ class ModelHandler {
       public readonly path: string[],
       public readonly target: object) {}
 
+  private _createProxy(): object {
+    return new Proxy(this.target, this);
+  }
+
   public static createForObject(model: Model, path: string[], data: Dictionary) {
     const wrapped = Object.create(null);
     for (var property in data) {
@@ -20,17 +24,20 @@ class ModelHandler {
         wrapped[property] = model.wrap(path.concat(key), data[property]);
       }
     }
-    return new ModelHandler(model, path, wrapped);
+    const handler = new ModelHandler(model, path, wrapped);
+    return handler._createProxy();
   }
 
   public static createForArray(model: Model, path: string[], data: any[]) {
-    return new ModelHandler(model, path, data.map((element, index) => {
+    const handler = new ModelHandler(model, path, data.map((element, index) => {
       return model.wrap(path.concat('' + index), element);
     }));
+    return handler._createProxy();
   }
 
   public static createWithPrototype(model: Model, path: string[], data: object) {
-    return new ModelHandler(model, path, Object.create(data));
+    const handler = new ModelHandler(model, path, Object.create(data));
+    return handler._createProxy();
   }
 
   public apply(target: object, thisArgument: any, argumentList: any[]): any {
@@ -119,9 +126,9 @@ export class Model {
       if (null === value) {
         return null;
       } else if (Array.isArray(value)) {
-        return new Proxy(value, ModelHandler.createForArray(this, path, value));
+        return ModelHandler.createForArray(this, path, value);
       } else {
-        return new Proxy(value, ModelHandler.createForObject(this, path, value));
+        return ModelHandler.createForObject(this, path, value);
       }
     default:
       throw new TypeError(`illegal value of type "${typeof value}" in model`);
@@ -130,8 +137,7 @@ export class Model {
 
   private constructor(data: object, extend: boolean) {
     if (extend) {
-      const handler = ModelHandler.createWithPrototype(this, [], data);
-      this.proxy = new Proxy<object>(handler.target, handler);
+      this.proxy = ModelHandler.createWithPrototype(this, [], data);
     } else {
       this.proxy = <object>(this.wrap([], data));
     }
