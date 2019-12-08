@@ -24,8 +24,17 @@ export const REGISTRY: DirectiveConstructorInterface[] = [
 }  // namespace Directives
 
 
+function _bind(directiveIndex: number, model: Model, node: Node): DirectiveInterface {
+  const registry = MVC.Directives.REGISTRY;
+  const DirectiveConstructor = registry[directiveIndex % registry.length];
+  return new DirectiveConstructor((model, node) => {
+    return _bind(directiveIndex + 1, model, node);
+  }, model, node);
+}
+
+
 export function bind(model: Dictionary, view: Element, controller: () => void): void {
-  // TODO
+  _bind(0, Model.create(model), view);
 }
 
 
