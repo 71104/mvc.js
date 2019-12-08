@@ -5,6 +5,7 @@
 /// <reference path="dir/If.ts" />
 /// <reference path="dir/For.ts" />
 /// <reference path="dir/Root.ts" />
+/// <reference path="dir/With.ts" />
 
 
 namespace MVC {
@@ -14,6 +15,7 @@ export namespace Directives {
 
 
 export const REGISTRY: DirectiveConstructorInterface[] = [
+  WithDirective,
   ForDirective,
   IfDirective,
   BindDirective,

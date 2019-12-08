@@ -146,7 +146,7 @@ export class Model {
     return new Model(data, false);
   }
 
-  public extend(data: Dictionary): Model {
+  public extend(data: Dictionary = {}): Model {
     const childScope = new Model(this.proxy, true);
     const childProxy: Dictionary = childScope.proxy;
     for (var key in data) {
