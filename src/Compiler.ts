@@ -30,7 +30,7 @@ function _bind(directiveIndex: number, model: Model, node: Node): DirectiveInter
   const registry = MVC.Directives.REGISTRY;
   const DirectiveConstructor = registry[directiveIndex % registry.length];
   return new DirectiveConstructor((model, node) => {
-    return _bind(directiveIndex + 1, model, node);
+    return _bind((directiveIndex + 1) % registry.length, model, node);
   }, model, node);
 }
 
