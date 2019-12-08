@@ -1,7 +1,9 @@
 /// <reference path="Common.ts" />
 /// <reference path="Model.ts" />
 /// <reference path="Directives.ts" />
+/// <reference path="Controllers.ts" />
 /// <reference path="dir/Bind.ts" />
+/// <reference path="dir/Controller.ts" />
 /// <reference path="dir/If.ts" />
 /// <reference path="dir/For.ts" />
 /// <reference path="dir/Root.ts" />
@@ -19,6 +21,7 @@ export const REGISTRY: DirectiveConstructorInterface[] = [
   ForDirective,
   IfDirective,
   BindDirective,
+  ControllerDirective,
   RootDirective,
 ];
 
@@ -35,13 +38,13 @@ function _bind(directiveIndex: number, model: Model, node: Node): DirectiveInter
 }
 
 
-export function bind(model: Dictionary, view: Element, controller: () => void): void {
+export function bind(model: Dictionary, view: Element): void {
   _bind(0, Model.create(model), view);
 }
 
 
-export function bindBody(model: Dictionary, controller: () => void): void {
-  MVC.bind(model, document.body, controller);
+export function bindBody(model: Dictionary): void {
+  MVC.bind(model, document.body);
 }
 
 
