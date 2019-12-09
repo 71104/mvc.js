@@ -23,24 +23,25 @@ export interface WatcherInterface {
 abstract class Watcher<ValueType> implements WatcherInterface {
   public readonly compiledExpression: CompiledExpression<ValueType>;
   private readonly _pathHandlers: PathHandler[];
+  private _lastValue: ValueType;
 
   public constructor(
       public readonly model: Model,
       public readonly expression: NodeInterface,
       immediate: boolean,
       private readonly _handler: ValueHandler<ValueType>,
-      scope: any = null)
+      private readonly _scope: any = null)
   {
     this.compiledExpression = this._compile(expression);
     this._pathHandlers = expression.getFreePaths().map(freePath => {
       // TODO: what if the following binding changes?
       const path = freePath.bind(this.model);
-      this.model.on(path, this._handler, scope);
-      return new PathHandler(path, this._handler);
+      this.model.on(path, this.trigger, this);
+      return new PathHandler(path, this.trigger);
     });
-    const value = this.value;
+    this._lastValue = this.value;
     if (immediate) {
-      this._handler.call(scope, value, value);
+      this.trigger();
     }
   }
 
@@ -48,6 +49,12 @@ abstract class Watcher<ValueType> implements WatcherInterface {
 
   public get value(): ValueType {
     return this.compiledExpression.call(this.model.proxy);
+  }
+
+  public trigger(): void {
+    const value = this.value;
+    this._handler.call(this._scope, value, this._lastValue);
+    this._lastValue = value;
   }
 
   public destroy(): void {
