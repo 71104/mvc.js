@@ -101,7 +101,7 @@ class SubscriptComponent implements PathComponentInterface {
   public constructor(public readonly index: NodeInterface) {}
 
   public equals(other: PathComponentInterface): boolean {
-    return other instanceof SubscriptComponent;
+    return false;
   }
 
   public getFreePaths(): FreePath[] {
