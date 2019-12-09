@@ -10,9 +10,8 @@ class WithDirective extends MVC.Directives.BaseDirective {
 
   public static matches(node: Node): boolean {
     return Node.ELEMENT_NODE === node.nodeType &&
-        Array.from((<Element>node).attributes).map(
-            attribute => attribute.name).some(
-            name => name.startsWith('mvc-with-'));
+        Array.from((<Element>node).attributes).some(
+            ({name}) => name.startsWith('mvc-with-'));
   }
 
   public constructor(next: DirectiveChainer, model: Model, node: Node) {

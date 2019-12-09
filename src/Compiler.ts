@@ -4,8 +4,9 @@
 /// <reference path="Controllers.ts" />
 /// <reference path="dir/Bind.ts" />
 /// <reference path="dir/Controller.ts" />
-/// <reference path="dir/If.ts" />
 /// <reference path="dir/For.ts" />
+/// <reference path="dir/If.ts" />
+/// <reference path="dir/On.ts" />
 /// <reference path="dir/Root.ts" />
 /// <reference path="dir/With.ts" />
 
