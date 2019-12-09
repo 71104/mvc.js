@@ -41,7 +41,7 @@ abstract class Watcher<ValueType> implements WatcherInterface {
     });
     this._lastValue = this.value;
     if (immediate) {
-      this.trigger();
+      this._triggerInternal(this._lastValue);
     }
   }
 
@@ -51,10 +51,13 @@ abstract class Watcher<ValueType> implements WatcherInterface {
     return this.compiledExpression.call(this.model.proxy);
   }
 
-  public trigger(): void {
-    const value = this.value;
+  private _triggerInternal(value: ValueType): void {
     this._handler.call(this._scope, value, this._lastValue);
     this._lastValue = value;
+  }
+
+  public trigger(): void {
+    this._triggerInternal(this.value);
   }
 
   public destroy(): void {
