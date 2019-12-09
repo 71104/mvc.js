@@ -47,7 +47,7 @@ function flatUniquePaths(...elements: (FreePath | FreePath[])[]): FreePath[] {
   const array = flatten<FreePath>(...elements);
   const result: FreePath[] = [];
   array.forEach(path => {
-    if (!array.some(other => path.equals(other))) {
+    if (!result.some(other => path.equals(other))) {
       result.push(path);
     }
   });
