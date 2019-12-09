@@ -23,7 +23,10 @@ class ForDirective extends MVC.Directives.BaseDirective {
   public constructor(next: DirectiveChainer, model: Model, node: Node) {
     super(next, model, node);
     const element = <Element>this.node;
-    const expression = String(element.getAttribute('mvc-for'));
+    const expression = element.getAttribute('mvc-for');
+    if (!expression) {
+      throw new Error('invalid value for mvc-for attribute (must be an iteration expression)');
+    }
     if (!this.node.parentNode) {
       throw new Error(`element with mvc-for=${JSON.stringify(expression)} is an orphan`);
     } else {

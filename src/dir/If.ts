@@ -15,7 +15,10 @@ class IfDirective extends MVC.Directives.BaseDirective {
   public constructor(next: DirectiveChainer, model: Model, node: Node) {
     super(next, model, node);
     const element = <Element>this.node;
-    const expression = String(element.getAttribute('mvc-if'));
+    const expression = element.getAttribute('mvc-if');
+    if (!expression) {
+      throw new Error('invalid value for mvc-if attribute (must be an expression)');
+    }
     const parentNode = element.parentNode;
     if (!parentNode) {
       throw new Error(`element with mvc-if=${JSON.stringify(expression)} is an orphan`);
