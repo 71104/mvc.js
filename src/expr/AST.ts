@@ -122,9 +122,7 @@ class ReferenceNode implements NodeInterface {
   public constructor(public readonly components: PathComponentInterface[]) {}
 
   public getFreePaths(): FreePath[] {
-    return flatUniquePaths(
-        new MVC.Expressions.FreePath(this.components),
-        ...this.components.map(component => component.getFreePaths()));
+    return [new MVC.Expressions.FreePath(this.components)];
   }
 
   public compile(): string {
