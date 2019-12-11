@@ -1,4 +1,5 @@
 /// <reference path="../Model.ts" />
+/// <reference path="../Trie.ts" />
 
 
 namespace MVC {
