@@ -14,7 +14,7 @@ class WatchNode {
       private readonly _model: Model,
       freePaths: FreePath[],
       private readonly _handler: () => void,
-      scope: any)
+      private readonly _scope: any)
   {
     freePaths.forEach(freePath => {
       const path = freePath.bind(this._model);
@@ -22,20 +22,25 @@ class WatchNode {
       this._paths.insert(path, dependentPaths.concat(freePath.getDependentPaths()));
     }, this);
     this._children = this._paths.map((path, dependentPaths) => {
-      this._model.on(path, this._handler, scope);
+      this._model.on(path, this._trigger, this);
       return (function childHandler() {
         const newNode = new WatchNode(this._model, dependentPaths, childHandler, this);
         const oldNode = this._children.insert(path, newNode);
         if (oldNode) {
           oldNode.destroy();
         }
+        this._trigger();
         return newNode;
       }());
     }, this);
   }
 
+  private _trigger(): void {
+    this._handler.call(this._scope);
+  }
+
   public destroy(): void {
-    this._paths.forEach(path => this._model.off(path, this._handler));
+    this._paths.forEach(path => this._model.off(path, this._trigger));
     this._paths.clear();
     this._children.forEach((path, child) => {
       child.destroy();
