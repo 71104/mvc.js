@@ -22,6 +22,10 @@ export class FreePath {
     });
   }
 
+  public getDependentPaths(): FreePath[] {
+    return flatten(...this.components.map(component => component.getFreePaths()));
+  }
+
   public bind(data: Dictionary): string[] {
     return this.components.map(component => String(component.evaluate(data)));
   }

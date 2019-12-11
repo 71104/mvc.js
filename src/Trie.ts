@@ -1,5 +1,5 @@
 class Trie<ValueType> {
-  private readonly _children: {[key: string]: Trie<ValueType>} = Object.create(null);
+  private _children: {[key: string]: Trie<ValueType>} = Object.create(null);
   private _value: ValueType | null = null;
 
   public get empty(): boolean {
@@ -71,6 +71,11 @@ class Trie<ValueType> {
       this._value = null;
       return value;
     }
+  }
+
+  public clear(): void {
+    this._children = Object.create(null);
+    this._value = null;
   }
 
   private _forEach(

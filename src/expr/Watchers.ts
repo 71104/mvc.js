@@ -6,6 +6,42 @@ namespace MVC {
 export namespace Expressions {
 
 
+class WatchNode {
+  private readonly _children: Trie<WatchNode>;
+
+  public constructor(
+      private readonly _model: Model,
+      freePaths: FreePath[],
+      private readonly _handler: () => void,
+      private readonly _scope: any)
+  {
+    const paths = new Trie<FreePath[]>();
+    freePaths.forEach(freePath => {
+      const path = freePath.bind(this._model);
+      const dependentPaths = paths.lookup(path) || [];
+      paths.insert(path, dependentPaths.concat(freePath.getDependentPaths()));
+    }, this);
+    this._children = paths.map((path, dependentPaths) => {
+      return (function childHandler() {
+        const newNode = new WatchNode(this._model, dependentPaths, childHandler, this);
+        const oldNode = this._children.insert(path, newNode);
+        if (oldNode) {
+          oldNode.destroy();
+        }
+        return newNode;
+      }());
+    }, this);
+  }
+
+  public destroy(): void {
+    this._children.forEach((path, child) => {
+      child.destroy();
+    });
+    this._children.clear();
+  }
+}
+
+
 class PathHandler {
   public constructor(
       public readonly path: string[],
