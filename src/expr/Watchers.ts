@@ -7,21 +7,22 @@ export namespace Expressions {
 
 
 class WatchNode {
+  private readonly _paths: Trie<FreePath[]> = new Trie<FreePath[]>();
   private readonly _children: Trie<WatchNode>;
 
   public constructor(
       private readonly _model: Model,
       freePaths: FreePath[],
       private readonly _handler: () => void,
-      private readonly _scope: any)
+      scope: any)
   {
-    const paths = new Trie<FreePath[]>();
     freePaths.forEach(freePath => {
       const path = freePath.bind(this._model);
-      const dependentPaths = paths.lookup(path) || [];
-      paths.insert(path, dependentPaths.concat(freePath.getDependentPaths()));
+      const dependentPaths = this._paths.lookup(path) || [];
+      this._paths.insert(path, dependentPaths.concat(freePath.getDependentPaths()));
     }, this);
-    this._children = paths.map((path, dependentPaths) => {
+    this._children = this._paths.map((path, dependentPaths) => {
+      this._model.on(path, this._handler, scope);
       return (function childHandler() {
         const newNode = new WatchNode(this._model, dependentPaths, childHandler, this);
         const oldNode = this._children.insert(path, newNode);
@@ -34,6 +35,8 @@ class WatchNode {
   }
 
   public destroy(): void {
+    this._paths.forEach(path => this._model.off(path, this._handler));
+    this._paths.clear();
     this._children.forEach((path, child) => {
       child.destroy();
     });
