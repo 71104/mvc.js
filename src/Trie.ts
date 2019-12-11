@@ -73,7 +73,7 @@ class Trie<ValueType> {
     }
   }
 
-  public forEach<ResultType>(
+  public forEach(
       prefix: string[],
       callback: (path: string[], value: ValueType) => void,
       scope: any = null): void
