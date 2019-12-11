@@ -31,7 +31,7 @@ class WatchNode {
         }
         this._trigger();
         return newNode;
-      }());
+      }.call(this));
     }, this);
   }
 
