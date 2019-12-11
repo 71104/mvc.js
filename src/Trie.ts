@@ -73,17 +73,24 @@ class Trie<ValueType> {
     }
   }
 
-  public forEach(
+  private _forEach(
       prefix: string[],
       callback: (path: string[], value: ValueType) => void,
       scope: any = null): void
   {
-    if (this._value) {
+    if (this._value !== null) {
       callback.call(scope, prefix, this._value);
     }
     for (var key in this._children) {
-      this._children[key].forEach(prefix.concat(key), callback, scope);
+      this._children[key]._forEach(prefix.concat(key), callback, scope);
     }
+  }
+
+  public forEach(
+      callback: (path: string[], value: ValueType) => void,
+      scope: any = null): void
+  {
+    this._forEach([], callback, scope);
   }
 
   public map<ResultType>(
@@ -91,7 +98,7 @@ class Trie<ValueType> {
       scope: any = null): Trie<ResultType>
   {
     const result = new Trie<ResultType>();
-    this.forEach([], (path, value) => {
+    this._forEach([], (path, value) => {
       result.insert(path, callback.call(scope, path, value));
     });
     return result;
