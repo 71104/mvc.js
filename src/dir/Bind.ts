@@ -27,7 +27,7 @@ class BindDirective extends MVC.Directives.BaseDirective {
   private _bindElement(element: Element): void {
     for (let i = 0; i < element.attributes.length; i++) {
       const attribute = element.attributes[i];
-      if (!attribute.name.startsWith('mvc-')) {
+      if (!attribute.name.startsWith('mvc-') && attribute.value) {
         const expression = MVC.Expressions.interpolate(attribute.value);
         if (!expression.isAllStatic()) {
           this.watchStringImmediate(expression, value => {
