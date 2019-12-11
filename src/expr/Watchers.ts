@@ -21,13 +21,13 @@ class WatchNode {
       const dependentPaths = this._paths.lookup(path) || [];
       this._paths.insert(path, dependentPaths.concat(freePath.getDependentPaths()));
     }, this);
-    this._paths.forEach((path, dependentPaths) => {
+    this._children = this._paths.map((path, dependentPaths) => {
       this._model.on(path, this._trigger, this);
-      this._children.insert(path, this._createChild(dependentPaths, function childHandler() {
+      return this._createChild(dependentPaths, function childHandler() {
         const node = this._createChild(dependentPaths, childHandler);
         this._children.insert(path, node)?.destroy();
         this._trigger();
-      }));
+      });
     }, this);
   }
 
