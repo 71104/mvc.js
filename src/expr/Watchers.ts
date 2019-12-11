@@ -24,13 +24,10 @@ class WatchNode {
     this._children = this._paths.map((path, dependentPaths) => {
       this._model.on(path, this._trigger, this);
       return (function childHandler() {
-        const newNode = new WatchNode(this._model, dependentPaths, childHandler, this);
-        const oldNode = this._children.insert(path, newNode);
-        if (oldNode) {
-          oldNode.destroy();
-        }
+        const node = new WatchNode(this._model, dependentPaths, childHandler, this);
+        this._children.insert(path, node)?.destroy();
         this._trigger();
-        return newNode;
+        return node;
       }.call(this));
     }, this);
   }
