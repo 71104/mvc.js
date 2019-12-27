@@ -82,6 +82,10 @@ controllers) you can simply tag the root element with the `mvc-app` attribute:
 
 TBD
 
+### `mvc-controller`
+
+TBD
+
 ### `mvc-if`
 
 TBD
