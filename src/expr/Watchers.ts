@@ -1,5 +1,4 @@
 /// <reference path="../Model.ts" />
-/// <reference path="../Trie.ts" />
 
 
 namespace MVC {
@@ -7,53 +6,60 @@ export namespace Expressions {
 
 
 class WatchNode {
-  private readonly _paths: Trie<FreePath[]> = new Trie<FreePath[]>();
-  private readonly _children: Trie<WatchNode> = new Trie<WatchNode>();
+  private _path: string[];
+  private readonly _children: WatchNode[];
 
   public constructor(
-      private readonly _model: Model,
-      freePaths: FreePath[],
+      public readonly model: Model,
+      public readonly freePath: FreePath,
       private readonly _handler: () => void,
       private readonly _scope: any)
   {
-    freePaths.forEach(freePath => {
-      const path = freePath.bind(this._model);
-      const dependentPaths = this._paths.lookup(path) || [];
-      this._paths.insert(path, dependentPaths.concat(freePath.getDependentPaths()));
-    }, this);
-    this._children = this._paths.map((path, dependentPaths) => {
-      this._model.on(path, this._trigger, this);
-      return this._createChild(dependentPaths, function childHandler() {
-        const node = this._createChild(dependentPaths, childHandler);
-        this._children.insert(path, node)?.destroy();
-        this._trigger();
-      });
-    }, this);
-  }
-
-  private _createChild(dependentPaths: FreePath[], handler: () => void): WatchNode {
-    return new WatchNode(this._model, dependentPaths, handler, this);
+    this._path = this.freePath.bind(this.model);
+    this.model.on(this._path, this._trigger, this);
+    this._children = this.freePath.getDependentPaths().map(
+      path => new WatchNode(this.model, path, () => {
+        this.model.off(this._path, this._trigger);
+        this._path = this.freePath.bind(this.model);
+        this.model.on(this._path, this._trigger, this);
+      }, this), this);
   }
 
   private _trigger(): void {
     this._handler.call(this._scope);
   }
 
+  public get path(): string[] {
+    return this._path;
+  }
+
   public destroy(): void {
-    this._paths.forEach(path => this._model.off(path, this._trigger));
-    this._paths.clear();
-    this._children.forEach((path, child) => {
+    this._children.forEach(child => {
       child.destroy();
     });
-    this._children.clear();
+    this._children.length = 0;
   }
 }
 
 
-class PathHandler {
+class WatchTree {
+  private readonly _roots: WatchNode[];
+
   public constructor(
-      public readonly path: string[],
-      public readonly handler: EventHandler) {}
+      public readonly model: Model,
+      public readonly expression: NodeInterface,
+      private readonly _handler: () => void,
+      private readonly _scope: any)
+  {
+    this._roots = expression.getFreePaths().map(path => new WatchNode(model, path, _handler, _scope));
+  }
+
+  public destroy(): void {
+    this._roots.forEach(child => {
+      child.destroy();
+    });
+    this._roots.length = 0;
+  }
 }
 
 
@@ -67,7 +73,7 @@ export interface WatcherInterface {
 
 abstract class Watcher<ValueType> implements WatcherInterface {
   public readonly compiledExpression: CompiledExpression<ValueType>;
-  private readonly _pathHandlers: PathHandler[];
+  private _watchTree: WatchTree;
   private _lastValue: ValueType;
 
   public constructor(
@@ -77,13 +83,8 @@ abstract class Watcher<ValueType> implements WatcherInterface {
       private readonly _handler: ValueHandler<ValueType>,
       private readonly _scope: any = null)
   {
-    this.compiledExpression = this._compile(expression);
-    this._pathHandlers = expression.getFreePaths().map(freePath => {
-      // TODO: what if the following binding changes?
-      const path = freePath.bind(this.model);
-      this.model.on(path, this.trigger, this);
-      return new PathHandler(path, this.trigger);
-    });
+    this.compiledExpression = this._compile(this.expression);
+    this._watchTree = new WatchTree(this.model, this.expression, this.trigger, this);
     this._lastValue = this.value;
     if (immediate) {
       this._triggerInternal(this._lastValue);
@@ -97,8 +98,9 @@ abstract class Watcher<ValueType> implements WatcherInterface {
   }
 
   private _triggerInternal(value: ValueType): void {
-    this._handler.call(this._scope, value, this._lastValue);
+    const lastValue = this._lastValue;
     this._lastValue = value;
+    this._handler.call(this._scope, value, lastValue);
   }
 
   public trigger(): void {
@@ -106,10 +108,7 @@ abstract class Watcher<ValueType> implements WatcherInterface {
   }
 
   public destroy(): void {
-    this._pathHandlers.forEach(({path, handler}) => {
-      this.model.off(path, handler);
-    }, this);
-    this._pathHandlers.length = 0;
+    this._watchTree.destroy();
   }
 }
 
