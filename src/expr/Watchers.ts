@@ -67,6 +67,8 @@ export type ValueHandler<ValueType> = (newValue: ValueType, oldValue: ValueType)
 
 
 export interface WatcherInterface {
+  trigger(): void;
+  triggerSection<ReturnValue>(section: () => ReturnValue, scope: any): ReturnValue;
   destroy(): void;
 }
 
@@ -75,6 +77,8 @@ abstract class Watcher<ValueType> implements WatcherInterface {
   public readonly compiledExpression: CompiledExpression<ValueType>;
   private _watchTree: WatchTree;
   private _lastValue: ValueType;
+  private _blocked: boolean = false;
+  private _triggered: boolean = false;
 
   public constructor(
       public readonly model: Model,
@@ -98,13 +102,34 @@ abstract class Watcher<ValueType> implements WatcherInterface {
   }
 
   private _triggerInternal(value: ValueType): void {
-    const lastValue = this._lastValue;
-    this._lastValue = value;
-    this._handler.call(this._scope, value, lastValue);
+    if (this._blocked) {
+      this._triggered = true;
+    } else {
+      const lastValue = this._lastValue;
+      this._lastValue = value;
+      try {
+        this._handler.call(this._scope, value, lastValue);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }
 
   public trigger(): void {
     this._triggerInternal(this.value);
+  }
+
+  public triggerSection<ReturnValue>(section: () => ReturnValue, scope: any = null): ReturnValue {
+    this._blocked = true;
+    this._triggered = false;
+    try {
+      return section.call(scope);
+    } finally {
+      this._blocked = false;
+      if (this._triggered) {
+        this.trigger();
+      }
+    }
   }
 
   public destroy(): void {

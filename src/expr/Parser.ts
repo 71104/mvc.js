@@ -200,7 +200,7 @@ export function compile(expression: NodeInterface): CompiledExpression<any> {
 export function compileSafe(expression: NodeInterface): CompiledExpression<any> {
   return <CompiledExpression<any>>(new Function(`
     try {
-      return(${expression.compile()});
+      return (${expression.compile()});
     } catch (e) {
       console.error(e);
     }
@@ -211,7 +211,7 @@ export function compileSafe(expression: NodeInterface): CompiledExpression<any> 
 export function compileSafeBoolean(expression: NodeInterface): CompiledExpression<boolean> {
   return <CompiledExpression<boolean>>(new Function(`
     try {
-      return!!(${expression.compile()});
+      return !!(${expression.compile()});
     } catch (e) {
       console.error(e);
       return false;
@@ -223,7 +223,7 @@ export function compileSafeBoolean(expression: NodeInterface): CompiledExpressio
 export function compileSafeInteger(expression: NodeInterface): CompiledExpression<number> {
   return <CompiledExpression<number>>(new Function(`
     try {
-      return~~(${expression.compile()});
+      return ~~(${expression.compile()});
     } catch (e) {
       console.error(e);
       return 0;
@@ -235,7 +235,7 @@ export function compileSafeInteger(expression: NodeInterface): CompiledExpressio
 export function compileSafeNumber(expression: NodeInterface): CompiledExpression<number> {
   return <CompiledExpression<number>>(new Function(`
     try {
-      return+(${expression.compile()});
+      return +(${expression.compile()});
     } catch (e) {
       console.error(e);
       return 0;
@@ -250,7 +250,7 @@ export function compileSafeString(expression: NodeInterface): CompiledExpression
       return String(${expression.compile()});
     } catch (e) {
       console.error(e);
-      return'';
+      return '';
     }
   `));
 }
