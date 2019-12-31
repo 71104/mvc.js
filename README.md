@@ -1,68 +1,16 @@
 # mvc.js
 
-A lightweight MVC framework inspired by [AngularJS](https://angularjs.org/) (not Angular).
+A lightweight MVC framework inspired by [AngularJS](https://angularjs.org/) (not Angular 2).
+
+This is mostly a trimmed-down version of AngularJS with a few important
+differences that make it more usable. It is also more efficient because it
+relies on [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+objects to detect changes rather than evaluating the entire model every time.
 
 ## Bootstrap
 
-Import the latest build:
-
-```html
-<html>
-<head>
-  ...
-  <script src="mvc.min.js"></script>
-</head>
-<body>
-  ...
-</body>
-</html>
-```
-
-Initialize by binding a DOM element to a model object:
-
-```html
-<body>
-  <div id="container">
-    ...
-  </div>
-  <script>
-    window.addEventListener('DOMContentLoaded', function () {
-      var container = document.getElementById('container');
-      MVC.bind({
-        foo: 'bar',
-        lorem: 'ipsum',
-        ...
-      }, container);
-    });
-  </script>
-</body>
-```
-
-Or just bind the document's body:
-
-```html
-<html>
-<head>
-  ...
-  <script src="mvc.min.js"></script>
-</head>
-<body>
-  ...
-  <script>
-    window.addEventListener('DOMContentLoaded', function () {
-      MVC.bindBody({
-        foo: 'bar',
-        lorem: 'ipsum',
-        ...
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-If you want to start out with an empty model (and add data later in your
-controllers) you can simply tag the root element with the `mvc-app` attribute:
+Import the latest build and initialize mvc.js by adding the `mvc-app` attribute
+to an element of your choice (typically the document body):
 
 ```html
 <html>
