@@ -1,3 +1,4 @@
+/// <reference path="../Common.ts" />
 /// <reference path="../Directives.ts" />
 /// <reference path="../expr/Parser.ts" />
 
@@ -56,8 +57,24 @@ class ForDirective extends MVC.Directives.BaseDirective {
           return new Replica(node, nextDirective);
         }, this);
       }, this);
+    } else if (parsedExpression instanceof DictionaryIterationNode) {
+      this.watchDictionaryImmediate(parsedExpression, dictionary => {
+        this._destroyReplicas();
+        const nextSibling = this._marker.nextSibling;
+        for (var key in dictionary) {
+          if (!dictionary.hasOwnProperty || dictionary.hasOwnProperty(key)) {
+            const node = this.node.cloneNode(true);
+            this._parentNode.insertBefore(node, nextSibling);
+            const childScope: Dictionary = {};
+            childScope[parsedExpression.keyName] = key;
+            childScope[parsedExpression.valueName] = dictionary[key];
+            const nextDirective = this.next(this.model.extend(childScope), node);
+            this._replicas.push(new Replica(node, nextDirective));
+          }
+        }
+      }, this);
     } else {
-      // TODO: dictionary iterations
+      throw new MVC.InternalError(`invalid AST node for mvc-for=${JSON.stringify(expression)}`);
     }
   }
 
