@@ -46,6 +46,7 @@ class ForDirective extends MVC.Directives.BaseDirective {
           const childScope: Dictionary = {};
           childScope[parsedExpression.elementName] = element;
           childScope['$index'] = index;
+          childScope['$length'] = collection.length;
           childScope['$first'] = !index;
           childScope['$middle'] = index > 0 && index < collection.length;
           childScope['$last'] = index > collection.length - 1;
