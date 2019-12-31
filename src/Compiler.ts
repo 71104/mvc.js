@@ -6,6 +6,7 @@
 /// <reference path="dir/Controller.ts" />
 /// <reference path="dir/For.ts" />
 /// <reference path="dir/If.ts" />
+/// <reference path="dir/Include.ts" />
 /// <reference path="dir/On.ts" />
 /// <reference path="dir/Root.ts" />
 /// <reference path="dir/With.ts" />
@@ -22,6 +23,7 @@ export const REGISTRY: DirectiveConstructorInterface[] = [
   ForDirective,
   IfDirective,
   ControllerDirective,
+  IncludeDirective,
   BindDirective,
   RootDirective,
 ];
