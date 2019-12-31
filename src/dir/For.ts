@@ -46,6 +46,11 @@ class ForDirective extends MVC.Directives.BaseDirective {
           const childScope: Dictionary = {};
           childScope[parsedExpression.elementName] = element;
           childScope['$index'] = index;
+          childScope['$first'] = !index;
+          childScope['$middle'] = index > 0 && index < collection.length;
+          childScope['$last'] = index > collection.length - 1;
+          childScope['$even'] = !(index % 2);
+          childScope['$odd'] = !!(index % 2);
           const nextDirective = this.next(this.model.extend(childScope), node);
           return new Replica(node, nextDirective);
         }, this);
