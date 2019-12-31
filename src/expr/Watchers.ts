@@ -1,3 +1,4 @@
+/// <reference path="../Common.ts" />
 /// <reference path="../Model.ts" />
 
 
@@ -180,6 +181,13 @@ export class CollectionWatcher extends Watcher<any[]> {
 }
 
 
+export class DictionaryWatcher extends Watcher<Dictionary> {
+  protected _compile(expression: NodeInterface): CompiledExpression<Dictionary> {
+    return MVC.Expressions.compileSafeDictionary(expression);
+  }
+}
+
+
 }  // namespace Expressions
 }  // namespace MVC
 
@@ -192,3 +200,4 @@ type IntegerWatcher = MVC.Expressions.IntegerWatcher;
 type NumberWatcher = MVC.Expressions.NumberWatcher;
 type StringWatcher = MVC.Expressions.StringWatcher;
 type CollectionWatcher = MVC.Expressions.CollectionWatcher;
+type DictionaryWatcher = MVC.Expressions.DictionaryWatcher;

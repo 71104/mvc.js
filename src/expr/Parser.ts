@@ -1,3 +1,4 @@
+/// <reference path="../Common.ts" />
 /// <reference path="Lexer.ts" />
 /// <reference path="AST.ts" />
 
@@ -263,6 +264,18 @@ export function compileSafeCollection(expression: NodeInterface): CompiledExpres
     } catch (e) {
       console.error(e);
       return [];
+    }
+  `));
+}
+
+
+export function compileSafeDictionary(expression: NodeInterface): CompiledExpression<Dictionary> {
+  return <CompiledExpression<Dictionary>>(new Function(`
+    try {
+      return (${expression.compile()});
+    } catch (e) {
+      console.error(e);
+      return {};
     }
   `));
 }

@@ -1,3 +1,4 @@
+/// <reference path="Common.ts" />
 /// <reference path="EventEmitter.ts" />
 /// <reference path="Model.ts" />
 /// <reference path="expr/AST.ts" />
@@ -66,6 +67,10 @@ export class BaseDirective implements DirectiveInterface {
     return this._register(new MVC.Expressions.CollectionWatcher(this.model, expression, false, handler, scope));
   }
 
+  public watchDictionary(expression: NodeInterface, handler: ValueHandler<Dictionary>, scope: any = null): DictionaryWatcher {
+    return this._register(new MVC.Expressions.DictionaryWatcher(this.model, expression, false, handler, scope));
+  }
+
   public watchImmediate(expression: NodeInterface, handler: ValueHandler<any>, scope: any = null): GenericWatcher {
     return this._register(new MVC.Expressions.GenericWatcher(this.model, expression, true, handler, scope));
   }
@@ -88,6 +93,10 @@ export class BaseDirective implements DirectiveInterface {
 
   public watchCollectionImmediate(expression: NodeInterface, handler: ValueHandler<any[]>, scope: any = null): CollectionWatcher {
     return this._register(new MVC.Expressions.CollectionWatcher(this.model, expression, true, handler, scope));
+  }
+
+  public watchDictionaryImmediate(expression: NodeInterface, handler: ValueHandler<Dictionary>, scope: any = null): DictionaryWatcher {
+    return this._register(new MVC.Expressions.DictionaryWatcher(this.model, expression, true, handler, scope));
   }
 
   public destroy(): void {
