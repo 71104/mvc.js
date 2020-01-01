@@ -6,7 +6,7 @@ export namespace Controllers {
 
 
 export interface ControllerInterface {
-  destroy(): void;
+  $destroy?(): void;
 }
 
 
