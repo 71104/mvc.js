@@ -22,7 +22,9 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
     }
     const fragment = MVC.Templates.lookup(templateName!);
     for (var child = fragment.firstChild; child; child = child.nextSibling) {
-      parentNode.insertBefore(child.cloneNode(true), this.node);
+      const clone = child.cloneNode(true);
+      parentNode.insertBefore(clone, this.node);
+      this.next(this.model, clone);
     }
     parentNode.removeChild(this.node);
   }
