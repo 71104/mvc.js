@@ -15,6 +15,15 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
     if (!element.hasAttribute('template')) {
       throw new Error('mvc-include requires the "template" attribute');
     }
-    // TODO
+    const templateName = element.getAttribute('template');
+    const parentNode = this.node.parentNode;
+    if (!parentNode) {
+      throw new Error(`<mvc-include template=${JSON.stringify(templateName)}> is an orphan`);
+    }
+    const fragment = MVC.Templates.lookup(templateName!);
+    for (var child = fragment.firstChild; child; child = child.nextSibling) {
+      parentNode.insertBefore(child.cloneNode(true), this.node);
+    }
+    parentNode.removeChild(this.node);
   }
 }
