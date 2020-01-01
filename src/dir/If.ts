@@ -12,8 +12,8 @@ class IfDirective extends MVC.Directives.BaseDirective {
     return Node.ELEMENT_NODE === node.nodeType && (<Element>node).hasAttribute('mvc-if');
   }
 
-  public constructor(next: DirectiveChainer, model: Model, node: Node) {
-    super(next, model, node);
+  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
+    super(chain, model, node);
     const element = <Element>this.node;
     const expression = element.getAttribute('mvc-if');
     if (!expression) {
@@ -30,7 +30,7 @@ class IfDirective extends MVC.Directives.BaseDirective {
       if (value !== this.status) {
         if (value) {
           parentNode.insertBefore(element, this._marker.nextSibling);
-          this._nextDirective = this.next(this.model, this.node);
+          this._nextDirective = this.chain(this.model, this.node);
         } else {
           this._nextDirective!.destroy();
           this._nextDirective = null;
@@ -39,7 +39,7 @@ class IfDirective extends MVC.Directives.BaseDirective {
       }
     }, this);
     if (watcher.value) {
-      this._nextDirective = this.next(this.model, this.node);
+      this._nextDirective = this.chain(this.model, this.node);
     } else {
       parentNode.removeChild(element);
     }

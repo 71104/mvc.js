@@ -5,14 +5,12 @@
 class BindDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME: string = 'bind';
 
-  private _nextDirective: DirectiveInterface | null;
-
   public static matches(node: Node): boolean {
     return [Node.ELEMENT_NODE, Node.TEXT_NODE].includes(node.nodeType);
   }
 
-  public constructor(next: DirectiveChainer, model: Model, node: Node) {
-    super(next, model, node);
+  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
+    super(chain, model, node);
     switch (node.nodeType) {
     case Node.ELEMENT_NODE:
       this._bindElement(<Element>node);
@@ -21,7 +19,7 @@ class BindDirective extends MVC.Directives.BaseDirective {
       this._bindText(<Text>node);
       break;
     }
-    this._nextDirective = this.next(this.model, this.node);
+    this.next(this.model, this.node);
   }
 
   private _bindElement(element: Element): void {
@@ -44,14 +42,6 @@ class BindDirective extends MVC.Directives.BaseDirective {
       this.watchStringImmediate(expression, value => {
         text.textContent = value;
       });
-    }
-  }
-
-  public destroy(): void {
-    super.destroy();
-    if (this._nextDirective) {
-      this._nextDirective.destroy();
-      this._nextDirective = null;
     }
   }
 }

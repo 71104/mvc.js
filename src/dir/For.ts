@@ -21,8 +21,8 @@ class ForDirective extends MVC.Directives.BaseDirective {
     return Node.ELEMENT_NODE === node.nodeType && (<Element>node).hasAttribute('mvc-for');
   }
 
-  public constructor(next: DirectiveChainer, model: Model, node: Node) {
-    super(next, model, node);
+  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
+    super(chain, model, node);
     const element = <Element>this.node;
     const expression = element.getAttribute('mvc-for');
     if (!expression) {
@@ -53,7 +53,7 @@ class ForDirective extends MVC.Directives.BaseDirective {
           childScope['$last'] = index > collection.length - 1;
           childScope['$even'] = !(index % 2);
           childScope['$odd'] = !!(index % 2);
-          const nextDirective = this.next(this.model.extend(childScope), node);
+          const nextDirective = this.chain(this.model.extend(childScope), node);
           return new Replica(node, nextDirective);
         }, this);
       }, this);
@@ -68,7 +68,7 @@ class ForDirective extends MVC.Directives.BaseDirective {
             const childScope: Dictionary = {};
             childScope[parsedExpression.keyName] = key;
             childScope[parsedExpression.valueName] = dictionary[key];
-            const nextDirective = this.next(this.model.extend(childScope), node);
+            const nextDirective = this.chain(this.model.extend(childScope), node);
             this._replicas.push(new Replica(node, nextDirective));
           }
         }

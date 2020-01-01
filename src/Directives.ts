@@ -32,11 +32,18 @@ export interface DirectiveConstructorInterface {
 
 export class BaseDirective implements DirectiveInterface {
   private readonly _watchers: WatcherInterface[] = [];
+  private readonly _children: DirectiveInterface[] = [];
 
   protected constructor(
-      public readonly next: DirectiveChainer,
+      protected readonly chain: DirectiveChainer,
       public readonly model: Model,
       public readonly node: Node) {}
+
+  protected next(model: Model, node: Node): DirectiveInterface {
+    const child = this.chain(model, node);
+    this._children.push(child);
+    return child;
+  }
 
   private _registerWatcher<WatcherType extends WatcherInterface>(watcher: WatcherType): WatcherType {
     this._watchers.push(watcher);
@@ -104,6 +111,14 @@ export class BaseDirective implements DirectiveInterface {
       watcher.destroy();
     });
     this._watchers.length = 0;
+    this._children.forEach(child => {
+      try {
+        child.destroy();
+      } catch (e) {
+        console.error(e);
+      }
+    });
+    this._children.length = 0;
   }
 }
 

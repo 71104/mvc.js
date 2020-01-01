@@ -6,16 +6,14 @@
 class WithDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME: string = 'with';
 
-  private _nextDirective: DirectiveInterface | null;
-
   public static matches(node: Node): boolean {
     return Node.ELEMENT_NODE === node.nodeType &&
         Array.from((<Element>node).attributes).some(
             ({name}) => name.startsWith('mvc-with-'));
   }
 
-  public constructor(next: DirectiveChainer, model: Model, node: Node) {
-    super(next, model, node);
+  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
+    super(chain, model, node);
     const attributes = Array.from((<Element>this.node).attributes).filter(
         attribute => attribute.name.startsWith('mvc-with-'));
     const childModel = this.model.extend();
@@ -27,14 +25,6 @@ class WithDirective extends MVC.Directives.BaseDirective {
         childScope[key] = value;
       });
     }, this);
-    this._nextDirective = this.next(childModel, this.node);
-  }
-
-  public destroy(): void {
-    super.destroy();
-    if (this._nextDirective) {
-      this._nextDirective.destroy();
-      this._nextDirective = null;
-    }
+    this.next(childModel, this.node);
   }
 }

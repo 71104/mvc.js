@@ -9,17 +9,12 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
     return Node.ELEMENT_NODE === node.nodeType && 'mvc-include' === node.nodeName.toLowerCase();
   }
 
-  public constructor(next: DirectiveChainer, model: Model, node: Node) {
-    super(next, model, node);
+  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
+    super(chain, model, node);
     const element = <Element>node;
     if (!element.hasAttribute('template')) {
       throw new Error('mvc-include requires the "template" attribute');
     }
-    // TODO
-  }
-
-  public destroy(): void {
-    super.destroy();
     // TODO
   }
 }
