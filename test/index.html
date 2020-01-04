@@ -3,15 +3,12 @@
 <head>
   <script src="mvc.js"></script>
 </head>
-<body>
-  <script>
-(function () {
-  const x = MVC.Expressions.interpolate('Hello, {{world}}!');
-  const y = MVC.Expressions.compileSafeString(x);
-  console.log(y.call({
-    world: 'world',
-  }));
-}());
-  </script>
+<body mvc-app>
+  <mvc-include template="hello">
+    <span>world</span>
+  </mvc-include>
+  <template id="hello">
+    <div>Hello, <mvc-transclude></mvc-transclude>!</div>
+  </template>
 </body>
 </html>
