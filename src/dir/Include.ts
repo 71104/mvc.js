@@ -23,9 +23,23 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
     const fragment = MVC.Templates.lookup(templateName!);
     for (var child = fragment.firstChild; child; child = child.nextSibling) {
       const clone = child.cloneNode(true);
+      if (Node.ELEMENT_NODE === clone.nodeType) {
+        this._transclude(<Element>clone);
+      }
       parentNode.insertBefore(clone, this.node);
       this.next(this.model, clone);
     }
     parentNode.removeChild(this.node);
+  }
+
+  private _transclude(template: Element): void {
+    const transclusionPoints = Array.from(template.querySelectorAll('mvc-transclude'));
+    transclusionPoints.forEach(element => {
+      const parentNode = element.parentNode;
+      for (var child = this.node.firstChild; child; child = child.nextSibling) {
+        parentNode!.insertBefore(child.cloneNode(true), element);
+      }
+      parentNode!.removeChild(element);
+    }, this);
   }
 }
