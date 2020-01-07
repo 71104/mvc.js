@@ -13,7 +13,6 @@ Import the latest build and initialize mvc.js by adding the `mvc-app` attribute
 to an element of your choice (typically the document body):
 
 ```html
-<!doctype html>
 <html>
 <head>
   ...
