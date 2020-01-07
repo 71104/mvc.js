@@ -5,7 +5,7 @@
 class ControllerDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME: string = 'controller';
 
-  private _controller: ControllerInterface;
+  private readonly _controller: ControllerInterface;
 
   public static matches(node: Node): boolean {
     return Node.ELEMENT_NODE === node.nodeType && (<Element>node).hasAttribute('mvc-controller');
