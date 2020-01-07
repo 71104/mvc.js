@@ -81,7 +81,9 @@ class ForDirective extends MVC.Directives.BaseDirective {
   private _destroyReplicas(): void {
     this._replicas.forEach(replica => {
       replica.nextDirective.destroy();
-      this._parentNode.removeChild(replica.node);
+      try {
+        this._parentNode.removeChild(replica.node);
+      } catch (e) {}
     }, this);
     this._replicas.length = 0;
   }
