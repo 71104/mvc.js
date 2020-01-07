@@ -165,7 +165,7 @@ Example:
 </body>
 ```
 
-The `<div>` element is kept in the DOM iff both model fields `var1` and `var2` are `true` (or other non-falsey JS values).
+The `<div>` element and its content are kept in the DOM iff both model fields `var1` and `var2` are `true` (or other non-falsey JS values).
 
 ### `mvc-for`
 
