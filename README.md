@@ -28,7 +28,23 @@ to an element of your choice (typically the document body):
 
 ### Two-way data binding
 
-TBD
+mvc.js supports the double curly bracket syntax for HTML attributes and text elements. They get updated automatically as the model changes. Example:
+
+```html
+<p mvc-controller="MyController" class="first-class {{secondClass}} third-class">
+  The quick brown {{jumper}} jumps over the lazy {{jumpee}}.
+</p>
+```
+
+```js
+function MyController(model) {
+  model.secondClass = 'second-class';
+  model.jumper = 'fox';
+  model.jumpee = 'dog';
+}
+```
+
+In the above we used [`mvc-controller`](#mvc-controller) to change the `secondClass`, `jumper`, and `jumpee` variables in the model.
 
 ### `mvc-on-*`
 
