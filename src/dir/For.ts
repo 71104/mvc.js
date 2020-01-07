@@ -41,23 +41,23 @@ class ForDirective extends MVC.Directives.BaseDirective {
     } else if (parsedExpression instanceof DictionaryIterationNode) {
       this.watchDictionaryImmediate(parsedExpression, dictionary => {
         this.destroyChildren();
-        const collection = [];
+        const keys = [];
         for (var key in dictionary) {
           if (!dictionary.hasOwnProperty || dictionary.hasOwnProperty(key)) {
-            collection.push(key);
+            keys.push(key);
           }
         }
         const nextSibling = this.marker!.nextSibling;
-        collection.forEach((element, index) => {
+        keys.forEach((key, index) => {
           const node = this.node.cloneNode(true);
           this.insertBefore(node, nextSibling, this.model.extend({
             [parsedExpression.keyName]: key,
             [parsedExpression.valueName]: dictionary[key],
             '$index': index,
-            '$length': collection.length,
+            '$length': keys.length,
             '$first': !index,
-            '$middle': index > 0 && index < collection.length,
-            '$last': index > collection.length - 1,
+            '$middle': index > 0 && index < keys.length,
+            '$last': index > keys.length - 1,
             '$even': !(index % 2),
             '$odd': !!(index % 2),
           }));
