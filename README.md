@@ -24,6 +24,25 @@ to an element of your choice (typically the document body):
 </html>
 ```
 
+Much like AngularJS, you can use `mvc-cloak` to prevent showing template DOM before mvc.js has a chance to render it, but you'll have to style it on your own (mvc.js only removes the `mvc-cloak` attribute or CSS class after rendering).
+
+```html
+<html>
+<head>
+  ...
+  <style>
+    [mvc-cloak] {
+      display: none !important;
+    }
+  </style>
+  <script src="mvc.min.js"></script>
+</head>
+<body mvc-app mvc-cloak>
+  ...
+</body>
+</html>
+```
+
 ## Directives
 
 Much like AngularJS, mvc.js has directives that affect the HTML elements to which they're attached and can be specified as HTML attributes (e.g. [`mvc-if`](#mvc-if)) or elements (e.g. [`mvc-include`](#mvc-include-mvc-transclude)).
