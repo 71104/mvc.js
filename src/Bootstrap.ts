@@ -7,6 +7,7 @@ namespace MVC {
 function _registerTemplates() {
   const elements = document.querySelectorAll('template');
   Array.from(elements).forEach(element => {
+    element.parentNode?.removeChild(element);
     try {
       MVC.Templates.register(element.id, element.content);
     } catch (e) {
