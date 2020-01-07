@@ -41,12 +41,7 @@ class ForDirective extends MVC.Directives.BaseDirective {
     } else if (parsedExpression instanceof DictionaryIterationNode) {
       this.watchDictionaryImmediate(parsedExpression, dictionary => {
         this.destroyChildren();
-        const keys = [];
-        for (var key in dictionary) {
-          if (!dictionary.hasOwnProperty || dictionary.hasOwnProperty(key)) {
-            keys.push(key);
-          }
-        }
+        const keys = Object.keys(dictionary);
         const nextSibling = this.marker!.nextSibling;
         keys.forEach((key, index) => {
           const node = this.node.cloneNode(true);
