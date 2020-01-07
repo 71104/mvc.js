@@ -52,7 +52,34 @@ TBD
 
 ### `mvc-include`, `mvc-transclude`
 
-TBD
+`mvc-include` elements are automatically replaced with the HTML code of the specified template. Templates are identified by unique names and can be either provided to the JavaScript API or as HTML5 `<template>` elements.
+
+The following:
+
+```html
+<body mvc-app>
+  <mvc-include template="template1"></mvc-include>
+  <mvc-include template="template2"></mvc-include>
+  <template id="template2">
+    <p>Paragraph 2.</p>
+  </template>
+</body>
+```
+
+```js
+MVC.Templates.registerFromString('template1', `
+  <p>Paragraph 1</p>
+`);
+```
+
+is equivalent to the following:
+
+```html
+<body>
+  <p>Paragraph 1.</p>
+  <p>Paragraph 2.</p>
+</body>
+```
 
 ### `mvc-controller`
 
