@@ -9,7 +9,6 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
     return Node.ELEMENT_NODE === node.nodeType && 'mvc-include' === node.nodeName.toLowerCase();
   }
 
-  private readonly _parentNode: Node;
   private readonly _nodes: Node[] = [];
 
   public constructor(chain: DirectiveChainer, model: Model, node: Node) {
@@ -19,10 +18,6 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
       throw new Error('mvc-include requires the "template" attribute');
     }
     const templateName = element.getAttribute('template');
-    if (!this.node.parentNode) {
-      throw new Error(`<mvc-include template=${JSON.stringify(templateName)}> is an orphan`);
-    }
-    this._parentNode = this.node.parentNode;
     const fragment = MVC.Templates.lookup(templateName!);
     for (var child = fragment.firstChild; child; child = child.nextSibling) {
       const clone = child.cloneNode(true);
@@ -49,7 +44,9 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
 
   public destroy(): void {
     this._nodes.forEach(node => {
-      this._parentNode.removeChild(node);
+      try {
+        this._parentNode.removeChild(node);
+      } catch (e) {}
     }, this);
     this._nodes.length = 0;
   }

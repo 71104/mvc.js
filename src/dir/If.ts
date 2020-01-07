@@ -5,7 +5,6 @@
 class IfDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME = 'if';
 
-  private readonly _parentNode: Node;
   private readonly _marker: Comment;
   private _nextDirective: DirectiveInterface | null = null;
 
@@ -20,10 +19,6 @@ class IfDirective extends MVC.Directives.BaseDirective {
     if (!expression) {
       throw new Error('invalid value for mvc-if attribute (must be an expression)');
     }
-    if (!element.parentNode) {
-      throw new Error(`element with mvc-if=${JSON.stringify(expression)} is an orphan`);
-    }
-    this._parentNode = element.parentNode;
     this._marker = document.createComment(`mvc-if: ${JSON.stringify(expression)}`);
     this._parentNode.insertBefore(this._marker, element);
     const parsedExpression = MVC.Expressions.parse(expression);

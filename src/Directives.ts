@@ -34,10 +34,19 @@ export abstract class BaseDirective implements DirectiveInterface {
   private readonly _watchers: WatcherInterface[] = [];
   private readonly _children: DirectiveInterface[] = [];
 
+  protected readonly _parentNode: Node;
+
   protected constructor(
       protected readonly chain: DirectiveChainer,
       public readonly model: Model,
-      public readonly node: Node) {}
+      public readonly node: Node)
+  {
+    if (node.parentNode) {
+      this._parentNode = node.parentNode;
+    } else {
+      throw new Error(`cannot bind an orphan node`);
+    }
+  }
 
   protected next(model: Model, node: Node): DirectiveInterface {
     const child = this.chain(model, node);

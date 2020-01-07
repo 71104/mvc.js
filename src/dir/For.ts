@@ -13,7 +13,6 @@ class Replica {
 class ForDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME: string = 'for';
 
-  private readonly _parentNode: Node;
   private readonly _marker: Node;
   private _replicas: Replica[] = [];
 
@@ -27,11 +26,6 @@ class ForDirective extends MVC.Directives.BaseDirective {
     const expression = element.getAttribute('mvc-for');
     if (!expression) {
       throw new Error('invalid value for mvc-for attribute (must be an iteration expression)');
-    }
-    if (!this.node.parentNode) {
-      throw new Error(`element with mvc-for=${JSON.stringify(expression)} is an orphan`);
-    } else {
-      this._parentNode = this.node.parentNode;
     }
     this._marker = document.createComment(`mvc-for: ${JSON.stringify(expression)}`);
     this._parentNode.insertBefore(this._marker, element);
@@ -91,5 +85,8 @@ class ForDirective extends MVC.Directives.BaseDirective {
   public destroy(): void {
     super.destroy();
     this._destroyReplicas();
+    try {
+      this._parentNode.removeChild(this._marker);
+    } catch (e) {}
   }
 }
