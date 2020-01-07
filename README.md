@@ -125,7 +125,7 @@ The content of an `mvc-include` element itself is _transcluded_ in the template 
 ```html
 <body mvc-app>
   <mvc-include template="dialog">
-    <p>The quick brown for jumps over the lazy dog.</p>
+    <p>The quick brown fox jumps over the lazy dog.</p>
   </mvc-include>
   <template id="dialog">
     <dialog open>
@@ -140,7 +140,7 @@ is equivalent to:
 ```html
 <body>
   <dialog open>
-    <p>The quick brown for jumps over the lazy dog.</p>
+    <p>The quick brown fox jumps over the lazy dog.</p>
   </dialog>
 </body>
 ```
