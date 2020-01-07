@@ -16,5 +16,15 @@ class RootDirective extends MVC.Directives.BaseDirective {
       this.next(model, child);
       child = nextSibling;
     }
+    if (Node.ELEMENT_NODE === node.nodeType) {
+      const element = <Element>node;
+      element.removeAttribute('mvc-cloak');
+      if (element.hasAttribute('class')) {
+        element.className = element.className
+            .split(' ')
+            .filter(name => 'mvc-cloak' !== name)
+            .join(' ');
+      }
+    }
   }
 }

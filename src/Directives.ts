@@ -38,7 +38,7 @@ export abstract class BaseDirective implements DirectiveInterface {
   protected readonly parentNode: Node;
   private _marker: Comment | null = null;
 
-  protected constructor(
+  public constructor(
       protected readonly chain: DirectiveChainer,
       public readonly model: Model,
       public readonly node: Node)

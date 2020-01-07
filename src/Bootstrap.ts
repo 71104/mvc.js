@@ -21,13 +21,7 @@ function _bootstrap() {
   if (elements.length > 1) {
     throw new Error(`${elements.length} elements tagged with 'mvc-app' have been detected (there can be only 1)`);
   } else if (elements.length > 0) {
-    const element = elements[0];
-    MVC.bind({}, element);
-    element.removeAttribute('mvc-cloak');
-    element.className = element.className
-        .split(' ')
-        .filter(name => 'mvc-cloak' !== name)
-        .join(' ');
+    MVC.bind({}, elements[0]);
   }
 }
 
