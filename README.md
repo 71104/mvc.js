@@ -24,6 +24,24 @@ to an element of your choice (typically the document body):
 </html>
 ```
 
+## Directives
+
+Much like AngularJS, mvc.js has directives that affect the HTML elements to which they're attached and can be specified as HTML attributes (e.g. [`mvc-if`](#mvc-if)) or elements (e.g. [`mvc-include`](#mvc-include-mvc-transclude)).
+
+When a DOM tree is bound to a model (either explicitly with `MVC.bind()` or implicitly using `mvc-app`) the tree is walked depth-first and for each node, each registered directive decides whether or not it can attach itself to the node. When a directive attaches itself to a node it takes responsibility for any changes performed on the node while keeping in mind that the next directives in the chain may also decide to attach themselves to the same node and perform other changes. Possible changes include even eliminating the node from the tree (cfr. [`mvc-if`](#mvc-if)) or replicating it many times (cfr. [`mvc-for`](#mvc-for)).
+
+The order in which existing directives are executed on each node is well defined and it's very important to determine how each element works, e.g. what fields can be fecthed from the model by each directive. Built-in directives are executed in the following order:
+
+1. [`mvc-with-*`](#mvc-with-)
+2. [`mvc-for`](#mvc-for)
+3. [`mvc-if`](#mvc-if)
+4. [`mvc-controller`](#mvc-controller)
+5. [`mvc-include`](#mvc-include-mvc-transclude)
+6. [`mvc-on-*`](#mvc-on-)
+7. [Two-way data binding](#two-way-data-binding)
+
+This means, for example, that `mvc-if` can access fields that are added to the model by `mvc-for`, such as the iteration variable, the `$index` variable, and so on, because `mvc-if` runs after `mvc-for`.
+
 ## Built-in Directives
 
 ### Two-way data binding
