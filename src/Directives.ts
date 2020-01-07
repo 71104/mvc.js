@@ -30,7 +30,7 @@ export interface DirectiveConstructorInterface {
 }
 
 
-export class BaseDirective implements DirectiveInterface {
+export abstract class BaseDirective implements DirectiveInterface {
   private readonly _watchers: WatcherInterface[] = [];
   private readonly _children: DirectiveInterface[] = [];
 
