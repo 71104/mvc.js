@@ -18,7 +18,17 @@ export interface ControllerConstructor {
 const _REGISTRY: {[name: string]: ControllerConstructor} = Object.create(null);
 
 
-export function register(name: string, controller: ControllerConstructor): void {
+export function register(
+    nameOrController: string | ControllerConstructor,
+    maybeController?: ControllerConstructor): void
+{
+  const [name, controller] = (function (): [string, ControllerConstructor] {
+    if (typeof nameOrController !== 'string') {
+      return [nameOrController.name, nameOrController];
+    } else {
+      return [nameOrController, maybeController!];
+    }
+  }());
   if (name in _REGISTRY) {
     throw new Error(`controller "${name}" has already been registered`);
   } else {
@@ -36,7 +46,8 @@ export function lookup(name: string): ControllerConstructor {
 }
 
 
-export function unregister(name: string): ControllerConstructor {
+export function unregister(nameOrController: string | ControllerConstructor): ControllerConstructor {
+  const name = typeof nameOrController !== 'string' ? nameOrController.name : nameOrController;
   if (name in _REGISTRY) {
     const controllerConstructor = _REGISTRY[name];
     delete _REGISTRY[name];

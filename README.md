@@ -37,11 +37,11 @@ mvc.js supports the double curly bracket syntax for HTML attributes and text ele
 ```
 
 ```js
-function MyController(model) {
+MVC.Controllers.register(function MyController(model) {
   model.secondClass = 'second-class';
   model.jumper = 'fox';
   model.jumpee = 'dog';
-}
+});
 ```
 
 In the above we used [`mvc-controller`](#mvc-controller) to change the `secondClass`, `jumper`, and `jumpee` variables in the model.
