@@ -151,7 +151,21 @@ TBD
 
 ### `mvc-if`
 
-TBD
+Adds or removes a DOM node conditionally based on an expression.
+
+Example:
+
+```html
+<body mvc-app>
+  ...
+  <div mvc-if="var1 && var2">
+    ...
+  </div>
+  ...
+</body>
+```
+
+The `<div>` element is kept in the DOM iff both model fields `var1` and `var2` are `true` (or other non-falsey JS values).
 
 ### `mvc-for`
 
