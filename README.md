@@ -99,6 +99,52 @@ is equivalent to the following:
 </body>
 ```
 
+Templates may contain other directives. The following:
+
+```html
+<body mvc-app>
+  <mvc-include template="paragraphs"></mvc-include>
+  <template id="paragraphs">
+    <p mvc-for="i in [1, 2, 3]">Paragraph {{i}}.</p>
+  </template>
+</body>
+```
+
+is equivalent to:
+
+```html
+<body>
+  <p>Paragraph 1.</p>
+  <p>Paragraph 2.</p>
+  <p>Paragraph 3.</p>
+</body>
+```
+
+The content of an `mvc-include` element itself is _transcluded_ in the template if the template has one or more _transclusion points_. Transclusion points are marked by the `<mvc-transclude>` element. For example:
+
+```html
+<body mvc-app>
+  <mvc-include template="dialog">
+    <p>The quick brown for jumps over the lazy dog.</p>
+  </mvc-include>
+  <template id="dialog">
+    <dialog open>
+      <mvc-transclude></mvc-transclude>
+    </dialog>
+  </template>
+</body>
+```
+
+is equivalent to:
+
+```html
+<body>
+  <dialog open>
+    <p>The quick brown for jumps over the lazy dog.</p>
+  </dialog>
+</body>
+```
+
 ### `mvc-controller`
 
 TBD
