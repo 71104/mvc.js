@@ -41,16 +41,27 @@ class ForDirective extends MVC.Directives.BaseDirective {
     } else if (parsedExpression instanceof DictionaryIterationNode) {
       this.watchDictionaryImmediate(parsedExpression, dictionary => {
         this.destroyChildren();
-        const nextSibling = this.marker!.nextSibling;
+        const collection = [];
         for (var key in dictionary) {
           if (!dictionary.hasOwnProperty || dictionary.hasOwnProperty(key)) {
-            const node = this.node.cloneNode(true);
-            this.insertBefore(node, nextSibling, this.model.extend({
-              [parsedExpression.keyName]: key,
-              [parsedExpression.valueName]: dictionary[key],
-            }));
+            collection.push(key);
           }
         }
+        const nextSibling = this.marker!.nextSibling;
+        collection.forEach((element, index) => {
+          const node = this.node.cloneNode(true);
+          this.insertBefore(node, nextSibling, this.model.extend({
+            [parsedExpression.keyName]: key,
+            [parsedExpression.valueName]: dictionary[key],
+            '$index': index,
+            '$length': collection.length,
+            '$first': !index,
+            '$middle': index > 0 && index < collection.length,
+            '$last': index > collection.length - 1,
+            '$even': !(index % 2),
+            '$odd': !!(index % 2),
+          }));
+        }, this);
       }, this);
     } else {
       throw new MVC.InternalError(`invalid AST node for mvc-for=${JSON.stringify(expression)}`);
