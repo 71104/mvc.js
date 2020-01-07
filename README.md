@@ -24,7 +24,7 @@ to an element of your choice (typically the document body):
 </html>
 ```
 
-Much like AngularJS, you can use `mvc-cloak` to prevent showing template DOM before mvc.js has a chance to render it, but you'll have to style it on your own (mvc.js only removes the `mvc-cloak` attribute or CSS class after rendering).
+Much like in AngularJS, you can use `mvc-cloak` to prevent showing template DOM before mvc.js has a chance to render it, but you'll have to style it on your own (mvc.js only removes the `mvc-cloak` attribute or CSS class after rendering).
 
 ```html
 <html>
