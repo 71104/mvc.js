@@ -13,6 +13,7 @@ Import the latest build and initialize mvc.js by adding the `mvc-app` attribute
 to an element of your choice (typically the document body):
 
 ```html
+<!doctype html>
 <html>
 <head>
   ...
@@ -30,6 +31,14 @@ to an element of your choice (typically the document body):
 
 TBD
 
+### `mvc-on-*`
+
+TBD
+
+### `mvc-include`, `mvc-transclude`
+
+TBD
+
 ### `mvc-controller`
 
 TBD
@@ -43,10 +52,6 @@ TBD
 TBD
 
 ### `mvc-with-*`
-
-TBD
-
-### `mvc-on-*`
 
 TBD
 

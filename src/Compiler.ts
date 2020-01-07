@@ -24,6 +24,7 @@ export const REGISTRY: DirectiveConstructorInterface[] = [
   IfDirective,
   ControllerDirective,
   IncludeDirective,
+  OnDirective,
   BindDirective,
   RootDirective,
 ];
