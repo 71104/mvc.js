@@ -9,8 +9,6 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
     return Node.ELEMENT_NODE === node.nodeType && 'mvc-include' === node.nodeName.toLowerCase();
   }
 
-  private readonly _nodes: Node[] = [];
-
   public constructor(chain: DirectiveChainer, model: Model, node: Node) {
     super(chain, model, node);
     const element = <Element>node;
@@ -19,16 +17,16 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
     }
     const templateName = element.getAttribute('template');
     const fragment = MVC.Templates.lookup(templateName!);
+    this.createMarker(`mvc-template: ${JSON.stringify(templateName)}`);
+    this.parentNode.removeChild(this.node);
+    const nextSibling = this.marker!.nextSibling;
     for (var child = fragment.firstChild; child; child = child.nextSibling) {
       const clone = child.cloneNode(true);
       if (Node.ELEMENT_NODE === clone.nodeType) {
         this._transclude(<Element>clone);
       }
-      this._nodes.push(clone);
-      this._parentNode.insertBefore(clone, this.node);
-      this.next(this.model, clone);
+      this.insertBefore(clone, nextSibling);
     }
-    this._parentNode.removeChild(this.node);
   }
 
   private _transclude(template: Element): void {
@@ -40,14 +38,5 @@ class IncludeDirective extends MVC.Directives.BaseDirective {
       }
       parentNode!.removeChild(element);
     }, this);
-  }
-
-  public destroy(): void {
-    this._nodes.forEach(node => {
-      try {
-        this._parentNode.removeChild(node);
-      } catch (e) {}
-    }, this);
-    this._nodes.length = 0;
   }
 }

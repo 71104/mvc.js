@@ -5,7 +5,6 @@
 class IfDirective extends MVC.Directives.BaseDirective {
   public static readonly NAME = 'if';
 
-  private readonly _marker: Comment;
   private _nextDirective: DirectiveInterface | null = null;
 
   public static matches(node: Node): boolean {
@@ -19,16 +18,14 @@ class IfDirective extends MVC.Directives.BaseDirective {
     if (!expression) {
       throw new Error('invalid value for mvc-if attribute (must be an expression)');
     }
-    this._marker = document.createComment(`mvc-if: ${JSON.stringify(expression)}`);
-    this._parentNode.insertBefore(this._marker, element);
+    this.createMarker(`mvc-if: ${JSON.stringify(expression)}`);
     const parsedExpression = MVC.Expressions.parse(expression);
     const watcher = this.watchBoolean(parsedExpression, value => {
       if (value !== this.status) {
         if (value) {
-          this._parentNode.insertBefore(element, this._marker.nextSibling);
-          this._nextDirective = this.chain(this.model, this.node);
+          this._nextDirective = this.insertBefore(element, this.marker!.nextSibling);
         } else {
-          this._remove();
+          this.destroyChildren();
         }
       }
     }, this);
@@ -36,34 +33,12 @@ class IfDirective extends MVC.Directives.BaseDirective {
       this._nextDirective = this.chain(this.model, this.node);
     } else {
       try {
-        this._parentNode.removeChild(element);
+        this.parentNode.removeChild(element);
       } catch (e) {}
     }
   }
 
   public get status(): boolean {
     return null !== this._nextDirective;
-  }
-
-  private _remove(): void {
-    if (this._nextDirective) {
-      this._nextDirective.destroy();
-      this._nextDirective = null;
-      try {
-        this._parentNode.removeChild(this.node);
-      } catch (e) {}
-    }
-  }
-
-  public _cleanup(): void {
-    this._remove();
-    try {
-      this._parentNode.removeChild(this._marker);
-    } catch (e) {}
-  }
-
-  public destroy(): void {
-    super.destroy();
-    this._cleanup();
   }
 }

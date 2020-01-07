@@ -16,6 +16,7 @@ export namespace Directives {
 
 
 export interface DirectiveInterface {
+  node: Node;
   destroy(): void;
 }
 
@@ -34,7 +35,8 @@ export abstract class BaseDirective implements DirectiveInterface {
   private readonly _watchers: WatcherInterface[] = [];
   private readonly _children: DirectiveInterface[] = [];
 
-  protected readonly _parentNode: Node;
+  protected readonly parentNode: Node;
+  private _marker: Comment | null = null;
 
   protected constructor(
       protected readonly chain: DirectiveChainer,
@@ -42,16 +44,56 @@ export abstract class BaseDirective implements DirectiveInterface {
       public readonly node: Node)
   {
     if (node.parentNode) {
-      this._parentNode = node.parentNode;
+      this.parentNode = node.parentNode;
     } else {
       throw new Error(`cannot bind an orphan node`);
     }
+  }
+
+  protected get marker(): Comment | null {
+    return this._marker;
+  }
+
+  protected createMarker(description: string): Comment {
+    if (this._marker) {
+      throw new Error(`duplicate marker: ${JSON.stringify(description)}`);
+    }
+    const marker = document.createComment(description);
+    this._marker = marker;
+    this.parentNode.insertBefore(this._marker, this.node);
+    return marker;
   }
 
   protected next(model: Model, node: Node): DirectiveInterface {
     const child = this.chain(model, node);
     this._children.push(child);
     return child;
+  }
+
+  protected insertBefore(node: Node, reference: Node | null, model?: Model): DirectiveInterface {
+    this.parentNode.insertBefore(node, reference);
+    const child = this.chain(model || this.model, node);
+    this._children.push(child);
+    return child;
+  }
+
+  protected removeChild(child: DirectiveInterface): boolean {
+    const index = this._children.indexOf(child);
+    if (index >= 0) {
+      this._children.splice(index, 1);
+      const node = child.node;
+      try {
+        child.destroy();
+      } catch (e) {
+        console.error(e);
+      }
+      try {
+        this.parentNode.removeChild(node);
+      } catch (e) {}
+      return true;
+    } else {
+      return false;
+    }
   }
 
   private _registerWatcher<WatcherType extends WatcherInterface>(watcher: WatcherType): WatcherType {
@@ -115,19 +157,35 @@ export abstract class BaseDirective implements DirectiveInterface {
     return this._registerWatcher(new MVC.Expressions.DictionaryWatcher(this.model, expression, true, handler, scope));
   }
 
-  public destroy(): void {
-    this._watchers.forEach(watcher => {
-      watcher.destroy();
-    });
-    this._watchers.length = 0;
+  protected destroyChildren(): void {
     this._children.forEach(child => {
+      const node = child.node;
       try {
         child.destroy();
       } catch (e) {
         console.error(e);
       }
+      try {
+        this.parentNode.removeChild(node);
+      } catch (e) {}
     });
     this._children.length = 0;
+  }
+
+  public destroy(): void {
+    this._watchers.forEach(watcher => {
+      watcher.destroy();
+    });
+    this._watchers.length = 0;
+    this.destroyChildren();
+    if (this._marker) {
+      try {
+        this.parentNode.removeChild(this._marker);
+      } catch (e) {
+        console.warn('failed to remove marker node');
+        console.warn(e);
+      }
+    }
   }
 }
 
