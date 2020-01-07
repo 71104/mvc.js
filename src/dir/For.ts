@@ -44,16 +44,16 @@ class ForDirective extends MVC.Directives.BaseDirective {
         this._replicas = collection.map((element, index) => {
           const node = this.node.cloneNode(true);
           this._parentNode.insertBefore(node, nextSibling);
-          const childScope: Dictionary = {};
-          childScope[parsedExpression.elementName] = element;
-          childScope['$index'] = index;
-          childScope['$length'] = collection.length;
-          childScope['$first'] = !index;
-          childScope['$middle'] = index > 0 && index < collection.length;
-          childScope['$last'] = index > collection.length - 1;
-          childScope['$even'] = !(index % 2);
-          childScope['$odd'] = !!(index % 2);
-          const nextDirective = this.chain(this.model.extend(childScope), node);
+          const nextDirective = this.chain(this.model.extend({
+            [parsedExpression.elementName]: element,
+            '$index': index,
+            '$length': collection.length,
+            '$first': !index,
+            '$middle': index > 0 && index < collection.length,
+            '$last': index > collection.length - 1,
+            '$even': !(index % 2),
+            '$odd': !!(index % 2),
+          }), node);
           return new Replica(node, nextDirective);
         }, this);
       }, this);
@@ -65,10 +65,10 @@ class ForDirective extends MVC.Directives.BaseDirective {
           if (!dictionary.hasOwnProperty || dictionary.hasOwnProperty(key)) {
             const node = this.node.cloneNode(true);
             this._parentNode.insertBefore(node, nextSibling);
-            const childScope: Dictionary = {};
-            childScope[parsedExpression.keyName] = key;
-            childScope[parsedExpression.valueName] = dictionary[key];
-            const nextDirective = this.chain(this.model.extend(childScope), node);
+            const nextDirective = this.chain(this.model.extend({
+              [parsedExpression.keyName]: key,
+              [parsedExpression.valueName]: dictionary[key],
+            }), node);
             this._replicas.push(new Replica(node, nextDirective));
           }
         }
