@@ -111,6 +111,7 @@ namespace MVC {
 
 
 export class Model {
+  private readonly _parent: Model | null;
   private readonly _handlers: EventEmitter = new EventEmitter();
   public readonly proxy: object;
 
@@ -134,7 +135,8 @@ export class Model {
     }
   }
 
-  private constructor(data: object, extend: boolean) {
+  private constructor(parent: Model | null, data: object, extend: boolean) {
+    this._parent = parent;
     if (extend) {
       this.proxy = ModelHandler.createWithPrototype(this, [], data);
     } else {
@@ -143,11 +145,11 @@ export class Model {
   }
 
   public static create(data: Dictionary): Model {
-    return new Model(data, false);
+    return new Model(null, data, false);
   }
 
   public extend(data: Dictionary = {}): Model {
-    const childScope = new Model(this.proxy, true);
+    const childScope = new Model(this, this.proxy, true);
     const childProxy: Dictionary = childScope.proxy;
     for (var key in data) {
       if (data.hasOwnProperty(key)) {
@@ -164,11 +166,13 @@ export class Model {
   }
 
   public on(path: string[], handler: EventHandler, scope: any = null): Model {
+    this._parent?.on(path, handler, scope);
     this._handlers.on(path, handler, scope);
     return this;
   }
 
   public off(path: string[], handler: EventHandler): Model {
+    this._parent?.off(path, handler);
     this._handlers.off(path, handler);
     return this;
   }
