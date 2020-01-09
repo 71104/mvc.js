@@ -135,9 +135,9 @@ export class Model {
     }
   }
 
-  private constructor(parent: Model | null, data: object, extend: boolean) {
+  private constructor(parent: Model | null, data: object) {
     this._parent = parent;
-    if (extend) {
+    if (parent) {
       this.proxy = ModelHandler.createWithPrototype(this, [], data);
     } else {
       this.proxy = <object>(this.wrap([], data));
@@ -145,11 +145,11 @@ export class Model {
   }
 
   public static create(data: Dictionary): Model {
-    return new Model(null, data, false);
+    return new Model(null, data);
   }
 
   public extend(data: Dictionary = {}): Model {
-    const childScope = new Model(this, this.proxy, true);
+    const childScope = new Model(this, this.proxy);
     const childProxy: Dictionary = childScope.proxy;
     for (var key in data) {
       if (data.hasOwnProperty(key)) {
