@@ -16,7 +16,7 @@ export namespace Directives {
 
 
 export interface DirectiveInterface {
-  node: Node;
+  readonly node: Node;
   destroy(): void;
 }
 
