@@ -10,6 +10,10 @@ export interface ControllerInterface {
 }
 
 
+export type ControllerHandler = (event: Event) => void;
+export type ControllerHandlers = {[name: string]: ControllerHandler};
+
+
 export interface ControllerConstructor {
   new (model: Dictionary): ControllerInterface;
 }
@@ -62,5 +66,38 @@ export function unregister(nameOrController: string | ControllerConstructor): Co
 }  // namespace MVC
 
 
+type ControllerHandler = MVC.Controllers.ControllerHandler;
+type ControllerHandlers = MVC.Controllers.ControllerHandlers;
 type ControllerInterface = MVC.Controllers.ControllerInterface;
 type ControllerConstructor = MVC.Controllers.ControllerConstructor;
+
+
+class NullController implements ControllerInterface {
+  public static readonly INSTANCE: NullController = new NullController();
+}
+
+
+class ControllerFrame {
+  public constructor(
+      private readonly _parent: ControllerFrame | null,
+      private readonly _controller: ControllerInterface) {}
+
+  public static create(): ControllerFrame {
+    return new ControllerFrame(null, NullController.INSTANCE);
+  }
+
+  public push(controller: ControllerInterface): ControllerFrame {
+    return new ControllerFrame(this, controller);
+  }
+
+  public lookup(handlerName: string): ControllerHandler | null {
+    const handler = (<ControllerHandlers>this._controller)[handlerName];
+    if (handler) {
+      return handler;
+    } else if (this._parent) {
+      return this._parent.lookup(handlerName);
+    } else {
+      return null;
+    }
+  }
+}
