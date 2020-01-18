@@ -13,7 +13,6 @@ class OnDirective extends MVC.Directives.BaseDirective {
 
   private readonly _element: Element;
   private readonly _handlers: ElementEventHandler[];
-  private _nextDirective: DirectiveInterface | null;
 
   public static matches(node: Node): boolean {
     return Node.ELEMENT_NODE === node.nodeType &&
@@ -37,18 +36,14 @@ class OnDirective extends MVC.Directives.BaseDirective {
         // TODO: handle event, call into controller
       });
     }, this);
-    this._nextDirective = this.chain(model, node, controllers);
+    this.next(this.model, this.node, this.controllers);
   }
 
   public destroy(): void {
-    super.destroy();
     this._handlers.forEach(({name, handler}) => {
       this._element.removeEventListener(name, handler, false);
     }, this);
     this._handlers.length = 0;
-    if (this._nextDirective) {
-      this._nextDirective.destroy();
-      this._nextDirective = null;
-    }
+    super.destroy();
   }
 }
