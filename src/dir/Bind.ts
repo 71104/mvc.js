@@ -9,8 +9,13 @@ class BindDirective extends MVC.Directives.BaseDirective {
     return [Node.ELEMENT_NODE, Node.TEXT_NODE].includes(node.nodeType);
   }
 
-  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
-    super(chain, model, node);
+  public constructor(
+      chain: DirectiveChainer,
+      model: Model,
+      node: Node,
+      controllers: ControllerFrame)
+  {
+    super(chain, model, node, controllers);
     switch (node.nodeType) {
     case Node.ELEMENT_NODE:
       this._bindElement(<Element>node);
@@ -19,7 +24,7 @@ class BindDirective extends MVC.Directives.BaseDirective {
       this._bindText(<Text>node);
       break;
     }
-    this.next(this.model, this.node);
+    this.next(this.model, this.node, this.controllers);
   }
 
   private _bindElement(element: Element): void {

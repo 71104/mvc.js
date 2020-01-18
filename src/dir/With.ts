@@ -12,8 +12,13 @@ class WithDirective extends MVC.Directives.BaseDirective {
             ({name}) => name.startsWith('mvc-with-'));
   }
 
-  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
-    super(chain, model, node);
+  public constructor(
+      chain: DirectiveChainer,
+      model: Model,
+      node: Node,
+      controllers: ControllerFrame)
+  {
+    super(chain, model, node, controllers);
     const attributes = Array.from((<Element>this.node).attributes).filter(
         attribute => attribute.name.startsWith('mvc-with-'));
     const childModel = this.model.extend();
@@ -25,6 +30,6 @@ class WithDirective extends MVC.Directives.BaseDirective {
         childScope[key] = value;
       });
     }, this);
-    this.next(childModel, this.node);
+    this.next(childModel, this.node, this.controllers);
   }
 }

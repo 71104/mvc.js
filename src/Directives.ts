@@ -1,6 +1,7 @@
 /// <reference path="Common.ts" />
 /// <reference path="EventEmitter.ts" />
 /// <reference path="Model.ts" />
+/// <reference path="Controllers.ts" />
 /// <reference path="expr/AST.ts" />
 /// <reference path="expr/Watchers.ts" />
 
@@ -21,13 +22,20 @@ export interface DirectiveInterface {
 }
 
 
-export type DirectiveChainer = (model: Model, node: Node) => DirectiveInterface;
+export type DirectiveChainer = (
+    model: Model,
+    node: Node,
+    controllers: ControllerFrame) => DirectiveInterface;
 
 
 export interface DirectiveConstructorInterface {
   NAME: string;
   matches(node: Node): boolean;
-  new (next: DirectiveChainer, model: Model, node: Node): DirectiveInterface;
+  new (
+    next: DirectiveChainer,
+    model: Model,
+    node: Node,
+    controllers: ControllerFrame): DirectiveInterface;
 }
 
 
@@ -41,7 +49,8 @@ export abstract class BaseDirective implements DirectiveInterface {
   public constructor(
       protected readonly chain: DirectiveChainer,
       public readonly model: Model,
-      public readonly node: Node)
+      public readonly node: Node,
+      public readonly controllers: ControllerFrame)
   {
     if (node.parentNode) {
       this.parentNode = node.parentNode;
@@ -64,15 +73,15 @@ export abstract class BaseDirective implements DirectiveInterface {
     return marker;
   }
 
-  protected next(model: Model, node: Node): DirectiveInterface {
-    const child = this.chain(model, node);
+  protected next(model: Model, node: Node, controllers: ControllerFrame): DirectiveInterface {
+    const child = this.chain(model, node, controllers);
     this._children.push(child);
     return child;
   }
 
   protected insertBefore(node: Node, reference: Node | null, model?: Model): DirectiveInterface {
     this.parentNode.insertBefore(node, reference);
-    const child = this.chain(model || this.model, node);
+    const child = this.chain(model || this.model, node, this.controllers);
     this._children.push(child);
     return child;
   }
@@ -177,6 +186,7 @@ export abstract class BaseDirective implements DirectiveInterface {
       watcher.destroy();
     });
     this._watchers.length = 0;
+    this.controllers.destroy();
     this.destroyChildren();
     if (this._marker) {
       try {

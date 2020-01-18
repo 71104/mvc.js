@@ -33,21 +33,21 @@ export const REGISTRY: DirectiveConstructorInterface[] = [
 }  // namespace Directives
 
 
-function _bind(directiveIndex: number, model: Model, node: Node): DirectiveInterface {
+function _bind(directiveIndex: number, model: Model, node: Node, controllers: ControllerFrame): DirectiveInterface {
   const registry = MVC.Directives.REGISTRY;
   const DirectiveConstructor = registry[directiveIndex % registry.length];
   if (DirectiveConstructor.matches(node)) {
-    return new DirectiveConstructor((model, node) => {
-      return _bind(directiveIndex + 1, model, node);
-    }, model, node);
+    return new DirectiveConstructor((model, node, controllers) => {
+      return _bind(directiveIndex + 1, model, node, controllers);
+    }, model, node, controllers);
   } else {
-    return _bind(directiveIndex + 1, model, node);
+    return _bind(directiveIndex + 1, model, node, controllers);
   }
 }
 
 
 export function bind(model: Dictionary, view: Element): void {
-  _bind(0, Model.create(model), view);
+  _bind(0, Model.create(model), view, ControllerFrame.create());
 }
 
 

@@ -21,8 +21,13 @@ class OnDirective extends MVC.Directives.BaseDirective {
             ({name}) => name.startsWith('mvc-on-'));
   }
 
-  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
-    super(chain, model, node);
+  public constructor(
+      chain: DirectiveChainer,
+      model: Model,
+      node: Node,
+      controllers: ControllerFrame)
+  {
+    super(chain, model, node, controllers);
     this._element = <Element>this.node;
     const attributes = Array.from(this._element.attributes).filter(
         ({name}) => name.startsWith('mvc-on-'));
@@ -32,7 +37,7 @@ class OnDirective extends MVC.Directives.BaseDirective {
         // TODO: handle event, call into controller
       });
     }, this);
-    this._nextDirective = this.chain(model, node);
+    this._nextDirective = this.chain(model, node, controllers);
   }
 
   public destroy(): void {

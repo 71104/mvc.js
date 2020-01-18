@@ -100,4 +100,8 @@ class ControllerFrame {
       return null;
     }
   }
+
+  public destroy(): void {
+    this._controller.$destroy?.();
+  }
 }

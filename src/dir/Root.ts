@@ -8,12 +8,17 @@ class RootDirective extends MVC.Directives.BaseDirective {
     return true;
   }
 
-  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
-    super(chain, model, node);
+  public constructor(
+      chain: DirectiveChainer,
+      model: Model,
+      node: Node,
+      controllers: ControllerFrame)
+  {
+    super(chain, model, node, controllers);
     var child = node.firstChild;
     while (child) {
       const nextSibling = child.nextSibling;
-      this.next(model, child);
+      this.next(model, child, controllers);
       child = nextSibling;
     }
     if (Node.ELEMENT_NODE === node.nodeType) {

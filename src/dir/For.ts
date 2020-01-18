@@ -10,8 +10,13 @@ class ForDirective extends MVC.Directives.BaseDirective {
     return Node.ELEMENT_NODE === node.nodeType && (<Element>node).hasAttribute('mvc-for');
   }
 
-  public constructor(chain: DirectiveChainer, model: Model, node: Node) {
-    super(chain, model, node);
+  public constructor(
+      chain: DirectiveChainer,
+      model: Model,
+      node: Node,
+      controllers: ControllerFrame)
+  {
+    super(chain, model, node, controllers);
     const element = <Element>this.node;
     const expression = element.getAttribute('mvc-for');
     if (!expression) {
