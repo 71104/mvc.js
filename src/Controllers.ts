@@ -93,7 +93,7 @@ class ControllerFrame {
   public lookup(handlerName: string): ControllerHandler | null {
     const handler = (<ControllerHandlers>this._controller)[handlerName];
     if (handler) {
-      return handler;
+      return handler.bind(this._controller);
     } else if (this._parent) {
       return this._parent.lookup(handlerName);
     } else {

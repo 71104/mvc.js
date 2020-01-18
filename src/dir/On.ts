@@ -31,10 +31,12 @@ class OnDirective extends MVC.Directives.BaseDirective {
     const attributes = Array.from(this._element.attributes).filter(
         ({name}) => name.startsWith('mvc-on-'));
     this._handlers = attributes.map(attribute => {
-      const key = attribute.name.replace(/^mvc-on-/, '');
-      return new ElementEventHandler(key, () => {
-        // TODO: handle event, call into controller
-      });
+      const name = attribute.name.replace(/^mvc-on-/, '');
+      const handler = this.controllers.lookup(attribute.value);
+      return {name, handler};
+    }, this).filter(({handler}) => !!handler).map(({name, handler}) => {
+      this._element.addEventListener(name, handler!, false);
+      return new ElementEventHandler(name, handler!);
     }, this);
     this.next(this.model, this.node, this.controllers);
   }
