@@ -102,6 +102,10 @@ class ControllerFrame {
   }
 
   public destroy(): void {
-    this._controller.$destroy?.();
+    try {
+      this._controller.$destroy?.();
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
