@@ -21,29 +21,40 @@ function _getCanonicalName(name: string): string {
 function _checkName(name: string): string {
   const canonicalName = _getCanonicalName(name);
   if (canonicalName in _REGISTRY) {
-    throw new Error(`double registration for template "${canonicalName}"`);
+    throw new Error(
+        `double registration for template ${JSON.stringify(canonicalName)}`);
   } else {
     return canonicalName;
   }
 }
 
 
-export function register(name: string, templateName: string): void {
-  _REGISTRY[_checkName(name)] = templateName;
-}
+export type Options = {
+  templateName?: string,
+  template?: string,
+  trim?: boolean,
+  controller?: ControllerInterface,
+};
 
 
-export function registerFromString(name: string, template: string): void {
+export function register(name: string, options: Options): void {
   const canonicalName = _checkName(name);
-  MVC.Templates.registerFromString(canonicalName, template);
-  _REGISTRY[canonicalName] = canonicalName;
-}
-
-
-export function registerTrimmedString(name: string, template: string): void {
-  const canonicalName = _checkName(name);
-  MVC.Templates.registerTrimmedString(canonicalName, template);
-  _REGISTRY[canonicalName] = canonicalName;
+  if (options.template) {
+    if (options.templateName) {
+      console.warn(
+          `template content specified for component ${JSON.stringify(name)}, ignoring templateName ${JSON.stringify(options.templateName)}.`);
+    }
+    MVC.Templates.register(canonicalName, {
+      content: options.template,
+      trim: options.trim,
+    });
+    _REGISTRY[canonicalName] = canonicalName;
+  } else if (options.templateName) {
+    _REGISTRY[canonicalName] = options.templateName;
+  } else {
+    throw new Error(
+        `no template specified for component ${JSON.stringify(name)}`);
+  }
 }
 
 
@@ -57,7 +68,7 @@ export function lookupTemplate(name: string): DocumentFragment {
   if (canonicalName in _REGISTRY) {
     return MVC.Templates.lookup(_REGISTRY[canonicalName]);
   } else {
-    throw new Error(`invalid template name: "${canonicalName}"`);
+    throw new Error(`invalid template name: ${JSON.stringify(canonicalName)}`);
   }
 }
 

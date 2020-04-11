@@ -9,7 +9,9 @@ function _registerTemplates() {
   Array.from(elements).forEach(element => {
     element.parentNode?.removeChild(element);
     try {
-      MVC.Templates.register(element.id, element.content);
+      MVC.Templates.register(element.id, {
+        fragment: element.content,
+      });
     } catch (e) {
       console.error(e);
     }

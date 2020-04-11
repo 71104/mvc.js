@@ -5,28 +5,35 @@ export namespace Templates {
 const _REGISTRY: {[name: string]: DocumentFragment} = Object.create(null);
 
 
-export function register(name: string, fragment: DocumentFragment): void {
-  if (name in _REGISTRY) {
-    throw new Error(`double registration for template "${name}"`);
-  } else {
-    _REGISTRY[name] = fragment;
-  }
-}
+export type Options = {
+  fragment?: DocumentFragment,
+  content?: string,
+  trim?: boolean,
+};
 
 
-export function registerFromString(name: string, content: string): void {
+export function register(name: string, options: Options): void {
   if (name in _REGISTRY) {
-    throw new Error(`double registration for template "${name}"`);
-  } else {
+    throw new Error(
+        `double registration for template ${JSON.stringify(name)}`);
+  } else if (options.fragment) {
+    if (options.content) {
+      console.warn(
+          `fragment specified for template ${JSON.stringify(name)}, ignoring content ${JSON.stringify(options.content)}.`);
+    }
+    _REGISTRY[name] = options.fragment;
+  } else if (options.content) {
     const template = document.createElement('template');
-    template.innerHTML = content;
+    if (false !== options.trim) {
+      template.innerHTML = options.content.trim();
+    } else {
+      template.innerHTML = options.content;
+    }
     _REGISTRY[name] = template.content;
+  } else {
+    throw new Error(
+        `no content specified for template ${JSON.stringify(name)}`);
   }
-}
-
-
-export function registerTrimmedString(name: string, content: string): void {
-  registerFromString(name, content.trim());
 }
 
 
